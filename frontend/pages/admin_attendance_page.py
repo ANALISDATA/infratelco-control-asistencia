@@ -22,6 +22,7 @@ def render(admin: User) -> None:
         if registro is None:
             filas.append({
                 "Empleado": empleado.full_name, "Entrada": "—", "Estado": "No marcó",
+                "Obra / trabajo": "—",
                 "Dirección entrada": "—", "Salida": "—", "Dirección salida": "—",
             })
         else:
@@ -29,6 +30,7 @@ def render(admin: User) -> None:
                 "Empleado": empleado.full_name,
                 "Entrada": formato_hora(registro.check_in_at) if registro.check_in_at else "—",
                 "Estado": "Puntual" if registro.check_in_status == "on_time" else "Tarde",
+                "Obra / trabajo": registro.observation or "—",
                 "Dirección entrada": registro.check_in_address or "—",
                 "Salida": formato_hora(registro.check_out_at) if registro.check_out_at else "Sin salida",
                 "Dirección salida": registro.check_out_address or "—",

@@ -80,10 +80,14 @@ def render(usuario: User) -> None:
 
     st.divider()
 
+    extra_ingreso = f"**Estado:** {'Puntual' if registro_hoy and registro_hoy.check_in_status == 'on_time' else 'Tarde'}" if registro_hoy else ""
+    if registro_hoy and registro_hoy.observation:
+        extra_ingreso += f"  \n**Obra / trabajo:** {registro_hoy.observation}"
+
     if registro_hoy and registro_hoy.check_out_at:
         st.markdown("### Jornada finalizada")
         _mostrar_confirmacion("Ingreso registrado", registro_hoy.check_in_at, registro_hoy.check_in_address,
-                               extra=f"**Estado:** {'Puntual' if registro_hoy.check_in_status == 'on_time' else 'Tarde'}")
+                               extra=extra_ingreso)
         st.markdown("---")
         horas = (registro_hoy.worked_minutes or 0) // 60
         minutos = (registro_hoy.worked_minutes or 0) % 60
@@ -92,7 +96,7 @@ def render(usuario: User) -> None:
 
     elif registro_hoy:
         _mostrar_confirmacion("Ingreso registrado", registro_hoy.check_in_at, registro_hoy.check_in_address,
-                               extra=f"**Estado:** {'Puntual' if registro_hoy.check_in_status == 'on_time' else 'Tarde'}")
+                               extra=extra_ingreso)
         st.divider()
         st.markdown("### Registrar salida")
         resultado_gps = _bloque_ubicacion("gps_salida")
@@ -109,10 +113,15 @@ def render(usuario: User) -> None:
 
     else:
         st.markdown("### Registrar ingreso")
+        comentario = st.text_input(
+            "Obra o trabajo a realizar (opcional)",
+            key="comentario_ingreso",
+            placeholder="Ej: Obra Torre Norte — instalación eléctrica",
+        )
         resultado_gps = _bloque_ubicacion("gps_ingreso")
         if st.button("REGISTRAR INGRESO", type="primary", width="stretch"):
             try:
-                resultado = attendance_service.registrar_ingreso(empleado, resultado_gps)
+                resultado = attendance_service.registrar_ingreso(empleado, resultado_gps, comentario)
             except attendance_service.AttendanceError as error:
                 st.error(str(error))
             else:
@@ -129,7 +138,10 @@ def render(usuario: User) -> None:
         for r in historicos:
             estado = "Puntual" if r.check_in_status == "on_time" else "Tarde" if r.check_in_status else "—"
             hora_salida = formato_hora(r.check_out_at) if r.check_out_at else "—"
-            st.write(
+            linea = (
                 f"**{r.work_date.strftime('%d/%m/%Y')}** — Ingreso "
                 f"{formato_hora(r.check_in_at) if r.check_in_at else '—'} ({estado}) · Salida {hora_salida}"
             )
+            if r.observation:
+                linea += f"  \n*{r.observation}*"
+            st.write(linea)

@@ -56,6 +56,22 @@ def test_ingreso_puntual(fake_db):
     assert resultado.advertencias == []
 
 
+def test_ingreso_guarda_el_comentario_de_obra(fake_db):
+    _sembrar_ajustes(fake_db, default_check_in_time="23:59:00")
+    empleado = _empleado()
+    resultado = attendance_service.registrar_ingreso(
+        empleado, _ubicacion_navegador(), comentario="Obra Torre Norte — instalación eléctrica"
+    )
+    assert resultado.registro.observation == "Obra Torre Norte — instalación eléctrica"
+
+
+def test_ingreso_sin_comentario_guarda_none(fake_db):
+    _sembrar_ajustes(fake_db, default_check_in_time="23:59:00")
+    empleado = _empleado()
+    resultado = attendance_service.registrar_ingreso(empleado, _ubicacion_navegador(), comentario="   ")
+    assert resultado.registro.observation is None
+
+
 def test_ingreso_tarde_fuera_de_tolerancia(fake_db, monkeypatch):
     # Hora esperada muy temprano en el día, sin tolerancia: cualquier hora real a la
     # que corra esta prueba queda "tarde" -- sin depender del reloj de la máquina.

@@ -81,7 +81,8 @@ def _resolver_ubicacion(resultado_navegador: dict | None, precision_minima_m: fl
     return ubicacion, motivo_falla
 
 
-def registrar_ingreso(empleado: Employee, resultado_navegador: dict | None) -> ResultadoRegistro:
+def registrar_ingreso(empleado: Employee, resultado_navegador: dict | None,
+                       comentario: str | None = None) -> ResultadoRegistro:
     if not empleado.is_active:
         raise AttendanceError("Tu usuario está desactivado. Contacta al administrador.")
 
@@ -108,6 +109,7 @@ def registrar_ingreso(empleado: Employee, resultado_navegador: dict | None) -> R
         "check_in_status": estado,
         "check_in_expected_at": esperado_dt.isoformat(),
         "original_check_in_at": momento.isoformat(),
+        "observation": comentario.strip() if comentario and comentario.strip() else None,
     }
     if ubicacion:
         fila.update(
