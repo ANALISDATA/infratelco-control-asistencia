@@ -131,18 +131,32 @@ def _css(oscuro: bool) -> str:
     border-color: rgba(255,255,255,0.15) !important;
 }}
 
+/* El texto de los botones va en <p>/<span> anidados dentro del <button>. La regla
+   ".stApp p, .stApp span" de arriba les pinta el color de texto normal de la página
+   -- y como esa regla apunta directo a esos elementos (no es herencia), gana sobre
+   el "color: ... !important" puesto solo en el <button> padre, aunque tenga
+   !important (el !important del padre solo protege lo heredado, no una coincidencia
+   directa en el hijo). Por eso el texto quedaba invisible sobre el fondo azul oscuro
+   -- se soluciona apuntando también a los hijos directamente. Se usa el dorado de
+   marca en vez de blanco, por pedido explícito del cliente. */
+div.stButton > button, div.stFormSubmitButton > button,
+div.stButton > button *, div.stFormSubmitButton > button * {{
+    color: {DORADO} !important;
+}}
 div.stButton > button, div.stFormSubmitButton > button {{
     background-color: {AZUL_OSCURO} !important;
-    color: {BLANCO} !important;
     border: none !important;
     border-radius: 8px !important;
     font-weight: 700 !important;
     letter-spacing: 0.02em;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }}
+div.stButton > button:hover, div.stFormSubmitButton > button:hover,
+div.stButton > button:hover *, div.stFormSubmitButton > button:hover * {{
+    color: {BLANCO} !important;
+}}
 div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     background-color: {AZUL} !important;
-    color: {BLANCO} !important;
     transform: translateY(-1px);
     box-shadow: 0 8px 16px -6px rgba(0,124,208,0.5);
 }}
@@ -150,6 +164,10 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     background-color: rgba(255,255,255,0.10) !important;
     border: 1.5px solid rgba(255,255,255,0.35) !important;
     padding: 0.55rem 0 !important;
+}}
+[data-testid="stSidebar"] div.stButton > button,
+[data-testid="stSidebar"] div.stButton > button * {{
+    color: {BLANCO} !important;
 }}
 [data-testid="stSidebar"] div.stButton > button:hover {{
     background-color: rgba(255,255,255,0.22) !important;
