@@ -4,6 +4,13 @@ El enrutamiento por rol usa st.navigation/st.Page (Streamlit >= 1.36) en vez del
 autodescubrimiento clásico de la carpeta pages/, precisamente para que cada página
 quede controlada por este archivo y nadie pueda llegar a una pantalla de administrador
 sin haber pasado por la verificación de sesión y rol de abajo.
+
+IMPORTANTE: st.navigation() se llama SIEMPRE, en cualquier estado (sin sesión, cambio
+de contraseña obligatorio, admin, empleado) — nunca con un st.stop() antes de llegar a
+él. Si en algún momento no se llega a invocarlo, Streamlit vuelve a su descubrimiento
+automático clásico de archivos en frontend/pages/ y expone en la barra lateral el
+nombre de CADA página interna (admin_dashboard_page, admin_audit_page...) a cualquier
+visitante sin loguear — bug real encontrado en producción el 29/08/2026.
 """
 import sys
 from pathlib import Path
@@ -35,11 +42,17 @@ st.set_page_config(
 usuario = usuario_actual()
 
 if usuario is None:
-    login_page.render()
+    # position="hidden": una sola página, no hace falta mostrar un menú de una opción.
+    paginas = [st.Page(login_page.render, title="Ingresar", url_path="login", default=True)]
+    st.navigation(paginas, position="hidden").run()
     st.stop()
 
 if usuario.must_change_password:
-    first_access_page.render(usuario)
+    paginas = [
+        st.Page(lambda: first_access_page.render(usuario), title="Cambiar contraseña",
+                url_path="cambiar-password", default=True)
+    ]
+    st.navigation(paginas, position="hidden").run()
     st.stop()
 
 branding.aplicar_estilo()
