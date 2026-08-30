@@ -144,7 +144,7 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
 [data-testid="stMetric"] {{
     min-height: 96px;
 }}
-[data-testid="stMetricLabel"] {{
+[data-testid="stMetricLabel"], [data-testid="stMetricLabel"] p {{
     color: #6B7280 !important;
     font-weight: 600 !important;
     font-size: 0.78rem !important;
@@ -152,7 +152,7 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     letter-spacing: 0.02em;
     white-space: normal !important;
     overflow: visible !important;
-    text-overflow: unset !important;
+    text-overflow: clip !important;
     line-height: 1.25 !important;
 }}
 [data-testid="stMetricValue"] {{
@@ -160,8 +160,10 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     font-weight: 800 !important;
 }}
 
-/* Títulos de página (st.header) -- más presencia, con acento de marca */
-div[data-testid="stHeading"] h1 {{
+/* Títulos de página (st.header) -- en esta versión de Streamlit renderiza <h2>,
+   no <h1> (verificado con Playwright contra el DOM real). Más presencia, con
+   acento de marca. */
+div[data-testid="stHeading"] h2 {{
     color: {AZUL_OSCURO} !important;
     font-weight: 800 !important;
     letter-spacing: -0.01em;
@@ -170,7 +172,7 @@ div[data-testid="stHeading"] h1 {{
     position: relative;
     display: inline-block;
 }}
-div[data-testid="stHeading"] h1::after {{
+div[data-testid="stHeading"] h2::after {{
     content: "";
     position: absolute;
     left: 0;
