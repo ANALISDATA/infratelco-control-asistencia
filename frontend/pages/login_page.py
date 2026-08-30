@@ -16,7 +16,7 @@ def render() -> None:
         if branding.MASCOTA_PATH.exists():
             col_mascota = st.columns([1, 1, 1])
             with col_mascota[1]:
-                st.image(str(branding.MASCOTA_PATH), width=150)
+                st.image(str(branding.MASCOTA_PATH), width=220)
 
         if not db.disponible():
             st.error(
