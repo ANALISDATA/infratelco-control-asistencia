@@ -1,0 +1,14 @@
+# Librerías que necesita la app. El servidor las instala solas al desplegar.
+#
+# streamlit se fija a una versión exacta por la misma razón documentada en EXTRACCION OP:
+# con versiones abiertas, un reinicio del servidor puede traer una actualización ajena
+# (streamlit o una de sus dependencias) que rompa la app sin que se haya tocado el código.
+streamlit==1.60.0
+
+supabase>=2.9,<3          # cliente de la base de datos (Supabase/PostgreSQL)
+bcrypt>=4.1,<5             # hashing de contraseñas (passlib se descartó: incompatible con bcrypt>=4.1, ver tests)
+openpyxl>=3.1,<4          # generación del Excel corporativo
+pandas>=2.2,<4            # tablas para dashboard/histórico/Excel
+requests>=2.31,<3         # llamadas a Nominatim (reverse geocoding)
+python-dateutil>=2.9,<3   # cálculos de fechas/horas
+tzdata>=2024.1            # base de datos de zonas horarias (necesaria en Windows)

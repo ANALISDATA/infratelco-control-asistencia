@@ -1,0 +1,23 @@
+# Secretos — nunca deben subirse
+.env
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Excel generados en tiempo de ejecución (no la plantilla)
+reports/generated/
+excel/generated/
+
+# Editor
+.vscode/
+.pytest_cache/
+*.log
+
