@@ -61,50 +61,72 @@ CSS = f"""
 
 /* Menú de navegación (st.navigation) -- botones tipo "pill", más pro */
 [data-testid="stSidebarNav"] {{
-    padding-top: 0.5rem;
+    padding-top: 0.5rem !important;
 }}
 [data-testid="stSidebarNavLink"] {{
-    border-radius: 10px;
-    margin: 0.15rem 0.4rem;
-    padding: 0.55rem 0.85rem !important;
-    font-weight: 600;
+    border-radius: 10px !important;
+    margin: 0.15rem 0.6rem !important;
+    padding: 0.6rem 0.9rem !important;
+    font-weight: 600 !important;
     letter-spacing: 0.01em;
+    background-color: transparent !important;
     transition: background-color 0.15s ease, transform 0.15s ease;
 }}
 [data-testid="stSidebarNavLink"]:hover {{
-    background-color: rgba(255,255,255,0.10);
+    background-color: rgba(255,255,255,0.12) !important;
     transform: translateX(2px);
 }}
 [data-testid="stSidebarNavLink"][aria-current="page"] {{
-    background: linear-gradient(90deg, rgba(254,207,3,0.22) 0%, rgba(254,207,3,0.06) 100%);
-    border-left: 3px solid {DORADO};
-    padding-left: calc(0.85rem - 3px) !important;
+    background: linear-gradient(90deg, rgba(254,207,3,0.28) 0%, rgba(254,207,3,0.05) 100%) !important;
+    border-left: 3px solid {DORADO} !important;
+    padding-left: calc(0.9rem - 3px) !important;
 }}
 [data-testid="stSidebarNavSeparator"] {{
     border-color: rgba(255,255,255,0.15) !important;
 }}
 
 div.stButton > button, div.stFormSubmitButton > button {{
-    background-color: {AZUL_OSCURO};
-    color: {BLANCO};
-    border: none;
-    border-radius: 8px;
-    font-weight: 700;
+    background-color: {AZUL_OSCURO} !important;
+    color: {BLANCO} !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
     letter-spacing: 0.02em;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }}
 div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
-    background-color: {AZUL};
-    color: {BLANCO};
+    background-color: {AZUL} !important;
+    color: {BLANCO} !important;
     transform: translateY(-1px);
     box-shadow: 0 8px 16px -6px rgba(0,124,208,0.5);
 }}
 [data-testid="stSidebar"] div.stButton > button {{
-    background-color: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.25);
+    background-color: rgba(255,255,255,0.10) !important;
+    border: 1.5px solid rgba(255,255,255,0.35) !important;
+    padding: 0.55rem 0 !important;
 }}
 [data-testid="stSidebar"] div.stButton > button:hover {{
-    background-color: rgba(255,255,255,0.18);
+    background-color: rgba(255,255,255,0.22) !important;
+    border-color: {DORADO} !important;
+}}
+
+/* Tarjeta del logo en la barra lateral -- evita que la imagen quede como un
+   rectángulo blanco pegado directo contra el azul. */
+[data-testid="stSidebar"] [data-testid="stImage"] {{
+    background: {BLANCO};
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    margin: 1.25rem 0.6rem 0.75rem 0.6rem;
+    box-shadow: 0 10px 24px -8px rgba(0,0,0,0.35);
+}}
+
+/* Chip de sesión (correo + rol) */
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {{
+    padding: 0 0.6rem;
+}}
+[data-testid="stSidebar"] div.stButton {{
+    padding: 0 0.6rem;
+    margin-top: 0.5rem;
 }}
 .infratelco-brandbar {{
     border-bottom: 4px solid {DORADO};
