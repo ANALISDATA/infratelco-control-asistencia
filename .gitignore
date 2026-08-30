@@ -21,3 +21,8 @@ excel/generated/
 .pytest_cache/
 *.log
 
+# Capturas de depuración (Playwright, verificación visual manual)
+dashboard_*.png
+*_screenshot*.png
+*_check*.png
+
