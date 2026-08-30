@@ -128,6 +128,31 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     padding: 0 0.6rem;
     margin-top: 0.5rem;
 }}
+/* Tarjetas de métricas (st.metric) -- fondo, sombra y acento de color */
+[data-testid="stMetric"] {{
+    background: {BLANCO};
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem 1rem 1.25rem;
+    box-shadow: 0 6px 18px -8px rgba(0,34,110,0.18), 0 0 0 1px rgba(0,34,110,0.06);
+    border-top: 3px solid {AZUL};
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}}
+[data-testid="stMetric"]:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -8px rgba(0,34,110,0.25), 0 0 0 1px rgba(0,34,110,0.08);
+}}
+[data-testid="stMetricLabel"] {{
+    color: #6B7280 !important;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}}
+[data-testid="stMetricValue"] {{
+    color: {AZUL_OSCURO} !important;
+    font-weight: 800 !important;
+}}
+
 .infratelco-brandbar {{
     border-bottom: 4px solid {DORADO};
     padding-bottom: 0.5rem;
