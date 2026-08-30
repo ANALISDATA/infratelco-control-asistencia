@@ -8,15 +8,15 @@ from frontend.components.session_state import iniciar_sesion
 _CSS_LOGIN = f"""
 <style>
 .stApp {{
-    background: radial-gradient(circle at 20% 15%, #003C9E 0%, {branding.AZUL_OSCURO} 45%, #00133F 100%) !important;
+    background: #F4F6FA !important;
 }}
 [data-testid="stHeader"] {{ background: transparent !important; }}
 
 .st-key-login_card {{
-    background: #FFFFFF;
+    background: radial-gradient(circle at 25% 10%, #003C9E 0%, {branding.AZUL_OSCURO} 55%, #00133F 100%);
     border-radius: 20px;
     padding: 2.75rem 2.5rem 2.25rem 2.5rem;
-    box-shadow: 0 25px 60px -12px rgba(0, 10, 40, 0.55), 0 0 0 1px rgba(255,255,255,0.06);
+    box-shadow: 0 25px 60px -12px rgba(0, 34, 110, 0.35), 0 0 0 1px rgba(0,34,110,0.08);
     position: relative;
     overflow: hidden;
 }}
@@ -25,12 +25,12 @@ _CSS_LOGIN = f"""
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 6px;
-    background: linear-gradient(90deg, {branding.AZUL_OSCURO} 0%, {branding.AZUL} 45%, {branding.DORADO} 75%, {branding.VERDE} 100%);
+    background: linear-gradient(90deg, {branding.DORADO} 0%, {branding.VERDE} 50%, {branding.AZUL} 100%);
 }}
 
 .login-marca {{
     text-align: center;
-    color: {branding.AZUL_OSCURO};
+    color: #FFFFFF;
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -39,14 +39,14 @@ _CSS_LOGIN = f"""
 }}
 .login-tagline {{
     text-align: center;
-    color: #6B7280;
+    color: rgba(255,255,255,0.65);
     font-size: 0.78rem;
     letter-spacing: 0.03em;
     margin-bottom: 0.4rem;
 }}
 .login-titulo {{
     text-align: center;
-    color: #14213D;
+    color: #FFFFFF;
     font-size: 1.7rem;
     font-weight: 800;
     margin: 0.15rem 0 1.5rem 0;
@@ -54,37 +54,43 @@ _CSS_LOGIN = f"""
 
 .st-key-login_card [data-testid="stImage"] img {{
     border-radius: 14px;
-    box-shadow: 0 12px 28px -8px rgba(0,34,110,0.35);
+    box-shadow: 0 12px 28px -8px rgba(0,0,0,0.45);
 }}
 
+.st-key-login_card label p {{
+    color: rgba(255,255,255,0.85) !important;
+}}
 .st-key-login_card div[data-testid="stTextInput"] input {{
     border-radius: 10px;
-    border: 1.5px solid #E2E5EC;
+    border: 1.5px solid transparent;
     padding: 0.65rem 0.9rem;
+    background: rgba(255,255,255,0.95);
 }}
 .st-key-login_card div[data-testid="stTextInput"] input:focus {{
-    border-color: {branding.AZUL};
-    box-shadow: 0 0 0 3px rgba(0,124,208,0.18);
+    border-color: {branding.DORADO};
+    box-shadow: 0 0 0 3px rgba(254,207,3,0.25);
 }}
 
 .st-key-login_card div.stFormSubmitButton > button {{
-    background: linear-gradient(90deg, {branding.AZUL_OSCURO} 0%, {branding.AZUL} 100%);
+    background: linear-gradient(90deg, {branding.DORADO} 0%, #FFDE59 100%);
+    color: {branding.AZUL_OSCURO};
     border-radius: 10px;
     padding: 0.7rem 0;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.03em;
     border: none;
-    box-shadow: 0 10px 20px -6px rgba(0,124,208,0.5);
+    box-shadow: 0 10px 20px -6px rgba(0,0,0,0.35);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }}
 .st-key-login_card div.stFormSubmitButton > button:hover {{
     transform: translateY(-1px);
-    box-shadow: 0 14px 26px -6px rgba(0,124,208,0.6);
+    box-shadow: 0 14px 26px -6px rgba(0,0,0,0.4);
+    color: {branding.AZUL_OSCURO};
 }}
 
 .login-footer {{
     text-align: center;
-    color: rgba(255,255,255,0.65);
+    color: #6B7280;
     font-size: 0.78rem;
     margin-top: 1.5rem;
     letter-spacing: 0.02em;
