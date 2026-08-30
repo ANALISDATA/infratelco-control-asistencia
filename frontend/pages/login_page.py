@@ -46,7 +46,7 @@ _CSS_LOGIN = f"""
 }}
 .login-titulo {{
     text-align: center;
-    color: #FFFFFF;
+    color: {branding.VERDE};
     font-size: 1.7rem;
     font-weight: 800;
     margin: 0.15rem 0 1.5rem 0;
