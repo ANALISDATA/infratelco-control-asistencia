@@ -97,6 +97,16 @@ _CSS_LOGIN = f"""
     margin-top: 1.5rem;
     letter-spacing: 0.02em;
 }}
+
+/* Celular: la tarjeta nunca debe verse cortada ni desbordar el ancho de la pantalla,
+   sea cual sea el tamaño del teléfono. */
+.stApp {{ overflow-x: hidden; }}
+.st-key-login_card img {{ max-width: 100%; height: auto; }}
+@media (max-width: 480px) {{
+    .block-container {{ padding-left: 0.75rem !important; padding-right: 0.75rem !important; }}
+    .st-key-login_card {{ padding: 2rem 1.25rem 1.75rem 1.25rem; }}
+    .login-titulo {{ font-size: 1.4rem; }}
+}}
 </style>
 """
 

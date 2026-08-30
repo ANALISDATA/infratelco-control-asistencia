@@ -250,6 +250,16 @@ div[data-testid="stHeading"] h2::after {{
     padding: 0 !important;
     font-size: 1.1rem !important;
 }}
+
+/* Celular: nunca debe aparecer una barra de scroll horizontal ni contenido cortado,
+   sea cual sea el tamaño del teléfono -- afecta sobre todo a "Mi cuenta" (marcar
+   ingreso/salida), la pantalla que más se usa desde el celular en campo. */
+.stApp {{ overflow-x: hidden; }}
+img {{ max-width: 100%; height: auto; }}
+@media (max-width: 480px) {{
+    .block-container {{ padding-left: 0.75rem !important; padding-right: 0.75rem !important; }}
+    div[data-testid="stHeading"] h2 {{ font-size: 1.4rem !important; }}
+}}
 </style>
 """
 

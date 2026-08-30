@@ -66,6 +66,12 @@ def barras_magnitud(df: pd.DataFrame, x: str, y: str, *, color: str = AZUL_OSCUR
     )
 
 
+def _rgba(hex_color: str, alpha: float) -> str:
+    hex_color = hex_color.lstrip("#")
+    r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
 def tendencia_lineas(
     df: pd.DataFrame,
     x: str,
@@ -107,7 +113,29 @@ def tendencia_lineas(
         detail="_serie:N",  # una línea/área continua por serie, no una sola mezclada
     )
 
-    area = base.mark_area(interpolate="monotone", line=False, opacity=0.18)
+    # Relleno degradado (color de la serie desvaneciéndose hacia transparente) en vez
+    # de un color plano: el degradado es una propiedad fija del trazo, no algo que se
+    # pueda codificar por dato, así que cada serie necesita su propia capa `mark_area`
+    # filtrada con transform_filter() sobre la MISMA fuente de datos -- ahora que este
+    # gráfico ya no pasa por el puente Arrow de Streamlit (se incrusta con
+    # st.components.v1.html, ver admin_dashboard_page.py), esta construcción ya no
+    # revienta el cálculo del eje como cuando se probó con st.altair_chart().
+    capas_area = [
+        base.transform_filter(alt.datum["_serie"] == columna).mark_area(
+            interpolate="monotone",
+            line=False,
+            fill=alt.Gradient(
+                gradient="linear",
+                stops=[
+                    alt.GradientStop(color=_rgba(color, 0.32), offset=0),
+                    alt.GradientStop(color=_rgba(color, 0.0), offset=1),
+                ],
+                x1=1, y1=1, x2=1, y2=0,
+            ),
+        )
+        for columna, color, _ in series
+    ]
+    area = alt.layer(*capas_area)
     linea = base.mark_line(interpolate="monotone", strokeWidth=2.5)
 
     # Objetivo de hover invisible en cada punto -- más fácil de acertar con el
