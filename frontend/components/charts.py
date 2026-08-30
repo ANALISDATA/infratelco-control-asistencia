@@ -19,8 +19,9 @@ import altair as alt
 import pandas as pd
 
 AZUL_OSCURO = "#00226E"
-VERDE_ESTADO = "#4A7519"
-GRIS_ESTADO = "#4B5563"
+VERDE_ESTADO = "#4A7519"   # bueno (activo, puntual) -- 5.04:1 sobre #F4F6FA
+AMBAR_ESTADO = "#B45309"  # advertencia (tarde) -- 4.64:1 sobre #F4F6FA
+GRIS_ESTADO = "#4B5563"   # neutro (inactivo, no marcó) -- 6.98:1 sobre #F4F6FA
 
 _FUENTE = "sans-serif"
 

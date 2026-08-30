@@ -24,9 +24,11 @@ from backend.models import Role  # noqa: E402
 from frontend.components import branding  # noqa: E402
 from frontend.components.session_state import cerrar_sesion, usuario_actual  # noqa: E402
 from frontend.pages import (  # noqa: E402
+    admin_attendance_page,
     admin_audit_page,
     admin_dashboard_page,
     admin_employees_page,
+    admin_schedules_page,
     admin_settings_page,
     employee_home_page,
     first_access_page,
@@ -65,8 +67,12 @@ if usuario.role_code == Role.ADMIN:
     paginas = [
         st.Page(lambda: admin_dashboard_page.render(usuario), title="Dashboard", icon="📊",
                 url_path="dashboard", default=True),
+        st.Page(lambda: admin_attendance_page.render(usuario), title="Asistencia del día", icon="🕒",
+                url_path="asistencia"),
         st.Page(lambda: admin_employees_page.render(usuario), title="Empleados", icon="👥",
                 url_path="empleados"),
+        st.Page(lambda: admin_schedules_page.render(usuario), title="Horarios", icon="🗓️",
+                url_path="horarios"),
         st.Page(lambda: admin_settings_page.render(usuario), title="Configuración", icon="⚙️",
                 url_path="configuracion"),
         st.Page(lambda: admin_audit_page.render(usuario), title="Auditoría", icon="🛡️",

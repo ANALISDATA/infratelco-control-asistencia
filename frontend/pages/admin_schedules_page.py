@@ -1,0 +1,86 @@
+from datetime import time as dtime
+
+import streamlit as st
+
+from backend.models import User
+from backend.services.schedules import schedule_service
+
+DIAS = [(1, "Lunes"), (2, "Martes"), (3, "Miércoles"), (4, "Jueves"), (5, "Viernes"), (6, "Sábado"), (7, "Domingo")]
+
+
+def _formulario_dias(prefijo: str, dias_existentes: dict) -> list[dict]:
+    dias = []
+    for weekday, nombre in DIAS:
+        existente = dias_existentes.get(weekday)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+            laboral = st.checkbox(nombre, value=(existente.is_working_day if existente else weekday <= 5),
+                                   key=f"{prefijo}_lab_{weekday}")
+        with col2:
+            entrada = st.time_input(
+                "Entrada", value=(existente.start_time if existente and existente.start_time else dtime(8, 0)),
+                key=f"{prefijo}_in_{weekday}", disabled=not laboral, label_visibility="collapsed",
+            )
+        with col3:
+            salida = st.time_input(
+                "Salida", value=(existente.end_time if existente and existente.end_time else dtime(17, 0)),
+                key=f"{prefijo}_out_{weekday}", disabled=not laboral, label_visibility="collapsed",
+            )
+        dias.append({
+            "weekday": weekday, "is_working_day": laboral,
+            "start_time": entrada.isoformat() if laboral else None,
+            "end_time": salida.isoformat() if laboral else None,
+        })
+    return dias
+
+
+def render(admin: User) -> None:
+    st.header("Horarios")
+
+    with st.expander("➕ Crear nuevo horario"):
+        with st.form("form_crear_horario"):
+            nombre = st.text_input("Nombre del horario *", placeholder="Ej. Horario Administrativo")
+            tolerancia = st.number_input("Tolerancia (minutos)", min_value=0, max_value=120, value=10)
+            st.caption("Día · hora de entrada · hora de salida")
+            dias = _formulario_dias("nuevo", {})
+            crear = st.form_submit_button("Crear horario", width="stretch")
+
+        if crear:
+            if not nombre.strip():
+                st.error("El nombre es obligatorio.")
+            else:
+                schedule_service.crear_horario(admin, nombre.strip(), int(tolerancia), dias)
+                st.success(f"Horario «{nombre}» creado.")
+                st.rerun()
+
+    st.divider()
+    horarios = schedule_service.listar_horarios()
+    if not horarios:
+        st.info("No hay horarios creados todavía. Mientras tanto, se usa el horario predeterminado de Configuración.")
+        return
+
+    opciones = {h.name: h.id for h in horarios}
+    seleccion = st.selectbox("Editar horario existente", ["—"] + list(opciones.keys()))
+    if seleccion == "—":
+        return
+
+    horario = schedule_service.obtener_horario(opciones[seleccion])
+    dias_existentes = {d.weekday: d for d in (horario.dias or [])}
+
+    with st.form(f"form_editar_{horario.id}"):
+        nombre = st.text_input("Nombre del horario", value=horario.name)
+        tolerancia = st.number_input("Tolerancia (minutos)", min_value=0, max_value=120,
+                                      value=horario.tolerance_minutes)
+        st.caption("Día · hora de entrada · hora de salida")
+        dias = _formulario_dias("editar", dias_existentes)
+        guardar = st.form_submit_button("Guardar cambios", width="stretch")
+
+    if guardar:
+        schedule_service.actualizar_horario(admin, horario.id, nombre.strip(), int(tolerancia), dias)
+        st.success("Horario actualizado.")
+        st.rerun()
+
+    if st.button("Desactivar este horario", key=f"desactivar_{horario.id}"):
+        schedule_service.desactivar_horario(admin, horario.id)
+        st.success("Horario desactivado.")
+        st.rerun()

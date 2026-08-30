@@ -15,5 +15,6 @@ openpyxl>=3.1,<4          # generación del Excel corporativo
 pandas>=2.2,<4            # tablas para dashboard/histórico/Excel
 altair>=5,<7               # gráficos del dashboard (mismo motor que EXTRACCION OP)
 requests>=2.31,<3         # llamadas a Nominatim (reverse geocoding)
+streamlit-js-eval==1.0.0  # pedir ubicación GPS al navegador (Geolocation API)
 python-dateutil>=2.9,<3   # cálculos de fechas/horas
 tzdata>=2024.1            # base de datos de zonas horarias (necesaria en Windows)

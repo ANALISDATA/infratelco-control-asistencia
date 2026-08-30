@@ -3,10 +3,11 @@
 Sistema empresarial de control de asistencia, ingreso, salida y geolocalización para
 **INFRATELCO — Ingeniería Eléctrica e Infraestructura**.
 
-> **Estado actual: Fase 1 completada** (estructura, base de datos, autenticación, roles,
-> gestión de empleados, configuración, auditoría). El registro de ingreso/salida con
-> geolocalización todavía **no existe** — es la Fase 2. Ver el detalle de qué funciona
-> hoy y qué falta al final de este archivo y en `documentation/`.
+> **Estado actual: Fases 1 y 2 completadas** (estructura, base de datos, autenticación,
+> roles, empleados, configuración, auditoría, horarios, y el registro de ingreso/salida
+> con geolocalización y Reverse Geocoding). Desplegada y funcionando en Streamlit
+> Community Cloud. Ver el detalle de qué funciona hoy y qué falta al final de este
+> archivo y en `documentation/`.
 
 ## Requisitos
 
@@ -58,26 +59,43 @@ Sistema empresarial de control de asistencia, ingreso, salida y geolocalización
 - En **Configuración**, completa NIT, dirección, teléfono y correo corporativos (se
   dejaron vacíos a propósito: no existían en la carpeta de trabajo y no se inventaron).
 
-## Qué funciona hoy (Fase 1) — probado
+## Qué funciona hoy — probado
 
-- Login por cédula o correo, con bloqueo tras 5 intentos fallidos.
+**Fase 1:**
+- Login por cédula o correo, con bloqueo tras 5 intentos fallidos, sesión persistente
+  (empleados no tienen que volver a loguearse cada día — 30 días; administradores 12h).
 - Cambio de contraseña obligatorio en el primer ingreso.
 - Gestión de empleados: crear, editar, activar/desactivar, cédula y correo únicos.
 - Configuración de empresa (horario, tolerancia, geolocalización, WhatsApp admin).
 - Auditoría inmutable de toda acción administrativa.
 - Identidad visual real de INFRATELCO (logo y colores tomados del logo original).
 
-32 pruebas automáticas pasan (`python -m pytest tests/ -v`), incluyendo una prueba que
-ejecuta la aplicación completa (framework oficial `AppTest` de Streamlit) y pruebas de
-los flujos de login/bloqueo y creación de empleados contra una base de datos simulada.
-**No se ha probado todavía contra un proyecto de Supabase real** porque no había
-credenciales configuradas — hazlo siguiendo los pasos de instalación de arriba y avísame
-si algo falla.
+**Fase 2:**
+- Registro de ingreso/salida con geolocalización real (GPS del navegador) y dirección
+  legible por Reverse Geocoding (Nominatim) — ver `documentation/geolocation.md`.
+- Hora oficial siempre del servidor, nunca del celular del empleado.
+- Puntualidad calculada según el horario asignado al empleado (o el predeterminado de
+  la empresa si no tiene uno asignado), con tolerancia configurable.
+- Horarios: crear/editar horarios con hora de entrada/salida y tolerancia por día de
+  la semana, y asignarlos a cada empleado.
+- Bloqueo de doble ingreso, doble salida, y salida sin ingreso.
+- Cálculo automático de horas trabajadas.
+- Dashboard con indicadores reales del día (ingresos, puntuales, tarde, no marcaron,
+  sin salida) y gráficos de barras profesionales.
+- Pantalla "Asistencia del día" para el administrador, con direcciones y coordenadas.
+
+43 pruebas automáticas pasan (`python -m pytest tests/ -v`), incluyendo una prueba que
+ejecuta la aplicación completa (framework oficial `AppTest` de Streamlit). El ciclo
+completo de ingreso/salida, cálculo de horas, y los indicadores del dashboard ya se
+probaron **contra la base de datos real** (no solo simulada) — ver
+`documentation/geolocation.md` para el detalle de qué se probó y qué falta.
+
+**No probado todavía:** el diálogo real del navegador pidiendo permiso de ubicación en
+un celular real (no hay forma de simular eso desde aquí) — es lo primero que deberías
+probar tú en la app ya desplegada.
 
 ## Qué falta (fases siguientes, ver `documentation/technical-decisions.md`)
 
-- **Fase 2**: registro de ingreso/salida, geolocalización, Reverse Geocoding, horarios,
-  puntualidad, dashboard con indicadores del día.
 - **Fase 3**: justificaciones, correcciones administrativas, histórico con filtros.
 - **Fase 4**: Excel corporativo, Power BI.
 - **Fase 5**: WhatsApp, email, resumen diario.

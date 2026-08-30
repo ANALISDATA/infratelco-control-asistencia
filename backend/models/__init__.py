@@ -3,7 +3,7 @@ para no pasar diccionarios sueltos entre repositorios, servicios y pantallas."""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, time
 
 
 def _parse_dt(valor) -> datetime | None:
@@ -20,6 +20,12 @@ def _parse_date(valor) -> date | None:
     if valor is None or isinstance(valor, date):
         return valor
     return date.fromisoformat(str(valor))
+
+
+def _parse_time(valor) -> time | None:
+    if valor is None or isinstance(valor, time):
+        return valor
+    return time.fromisoformat(str(valor))
 
 
 @dataclass
@@ -130,3 +136,101 @@ class CompanySettings:
     def from_row(row: dict) -> "CompanySettings":
         campos = {f: row.get(f) for f in CompanySettings.__dataclass_fields__ if f in row}
         return CompanySettings(**campos)
+
+
+@dataclass
+class ScheduleDay:
+    weekday: int  # 1=Lunes ... 7=Domingo (ISO-8601)
+    is_working_day: bool = True
+    start_time: time | None = None
+    end_time: time | None = None
+    id: str | None = None
+    schedule_id: str | None = None
+
+    @staticmethod
+    def from_row(row: dict) -> "ScheduleDay":
+        return ScheduleDay(
+            id=row.get("id"),
+            schedule_id=row.get("schedule_id"),
+            weekday=row["weekday"],
+            is_working_day=row.get("is_working_day", True),
+            start_time=_parse_time(row.get("start_time")),
+            end_time=_parse_time(row.get("end_time")),
+        )
+
+
+@dataclass
+class Schedule:
+    id: str | None
+    name: str
+    tolerance_minutes: int = 10
+    is_active: bool = True
+    dias: list[ScheduleDay] | None = None
+
+    @staticmethod
+    def from_row(row: dict) -> "Schedule":
+        return Schedule(
+            id=row.get("id"),
+            name=row["name"],
+            tolerance_minutes=row.get("tolerance_minutes", 10),
+            is_active=row.get("is_active", True),
+        )
+
+
+@dataclass
+class AttendanceRecord:
+    id: str | None
+    employee_id: str
+    work_date: date
+
+    check_in_at: datetime | None = None
+    check_in_status: str | None = None  # 'on_time' | 'late'
+    check_in_expected_at: datetime | None = None
+    check_in_latitude: float | None = None
+    check_in_longitude: float | None = None
+    check_in_accuracy_m: float | None = None
+    check_in_location_at: datetime | None = None
+    check_in_address: str | None = None
+
+    check_out_at: datetime | None = None
+    check_out_status: str | None = None  # 'registered' | 'missing'
+    check_out_latitude: float | None = None
+    check_out_longitude: float | None = None
+    check_out_accuracy_m: float | None = None
+    check_out_location_at: datetime | None = None
+    check_out_address: str | None = None
+
+    worked_minutes: int | None = None
+
+    observation: str | None = None
+    justification_id: str | None = None
+    modified_by: str | None = None
+    modified_at: datetime | None = None
+
+    @staticmethod
+    def from_row(row: dict) -> "AttendanceRecord":
+        return AttendanceRecord(
+            id=row.get("id"),
+            employee_id=row["employee_id"],
+            work_date=_parse_date(row["work_date"]),
+            check_in_at=_parse_dt(row.get("check_in_at")),
+            check_in_status=row.get("check_in_status"),
+            check_in_expected_at=_parse_dt(row.get("check_in_expected_at")),
+            check_in_latitude=row.get("check_in_latitude"),
+            check_in_longitude=row.get("check_in_longitude"),
+            check_in_accuracy_m=row.get("check_in_accuracy_m"),
+            check_in_location_at=_parse_dt(row.get("check_in_location_at")),
+            check_in_address=row.get("check_in_address"),
+            check_out_at=_parse_dt(row.get("check_out_at")),
+            check_out_status=row.get("check_out_status"),
+            check_out_latitude=row.get("check_out_latitude"),
+            check_out_longitude=row.get("check_out_longitude"),
+            check_out_accuracy_m=row.get("check_out_accuracy_m"),
+            check_out_location_at=_parse_dt(row.get("check_out_location_at")),
+            check_out_address=row.get("check_out_address"),
+            worked_minutes=row.get("worked_minutes"),
+            observation=row.get("observation"),
+            justification_id=row.get("justification_id"),
+            modified_by=row.get("modified_by"),
+            modified_at=_parse_dt(row.get("modified_at")),
+        )

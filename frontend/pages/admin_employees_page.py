@@ -6,10 +6,17 @@ import streamlit as st
 from backend.models import Employee, User
 from backend.repositories import employee_repository
 from backend.services.employees import employee_service
+from backend.services.schedules import schedule_service
+
+
+def _opciones_horario() -> dict[str, str | None]:
+    horarios = schedule_service.listar_horarios()
+    return {"Predeterminado de la empresa": None, **{h.name: h.id for h in horarios}}
 
 
 def _formulario_crear(admin: User) -> None:
     with st.expander("➕ Crear nuevo empleado", expanded=False):
+        opciones_horario = _opciones_horario()
         with st.form("form_crear_empleado", clear_on_submit=True):
             col1, col2 = st.columns(2)
             with col1:
@@ -22,6 +29,7 @@ def _formulario_crear(admin: User) -> None:
                 cargo = st.text_input("Cargo")
                 area = st.text_input("Área / departamento")
                 fecha_ingreso = st.date_input("Fecha de ingreso", value=date.today())
+            horario_nombre = st.selectbox("Horario", list(opciones_horario.keys()))
 
             enviar = st.form_submit_button("Crear empleado", width="stretch")
 
@@ -42,6 +50,7 @@ def _formulario_crear(admin: User) -> None:
                         position=cargo.strip() or None,
                         department=area.strip() or None,
                         hire_date=fecha_ingreso,
+                        schedule_id=opciones_horario[horario_nombre],
                     ),
                 )
             except (employee_repository.DocumentoDuplicado, employee_repository.CorreoDuplicado) as e:
@@ -91,6 +100,11 @@ def _tabla_empleados(admin: User) -> None:
         return
 
     empleado = opciones[seleccion]
+    opciones_horario = _opciones_horario()
+    nombre_horario_actual = next(
+        (nombre for nombre, sid in opciones_horario.items() if sid == empleado.schedule_id),
+        "Predeterminado de la empresa",
+    )
     with st.form(f"form_editar_{empleado.id}"):
         col1, col2 = st.columns(2)
         with col1:
@@ -101,6 +115,10 @@ def _tabla_empleados(admin: User) -> None:
             cargo = st.text_input("Cargo", value=empleado.position or "")
             area = st.text_input("Área / departamento", value=empleado.department or "")
             whatsapp = st.text_input("WhatsApp", value=empleado.whatsapp_number or "")
+        horario_nombre = st.selectbox(
+            "Horario", list(opciones_horario.keys()),
+            index=list(opciones_horario.keys()).index(nombre_horario_actual),
+        )
         guardar = st.form_submit_button("Guardar cambios")
 
     if guardar:
@@ -115,6 +133,7 @@ def _tabla_empleados(admin: User) -> None:
                     "position": cargo.strip() or None,
                     "department": area.strip() or None,
                     "whatsapp_number": whatsapp.strip() or None,
+                    "schedule_id": opciones_horario[horario_nombre],
                 },
             )
         except (employee_repository.DocumentoDuplicado, employee_repository.CorreoDuplicado) as e:
