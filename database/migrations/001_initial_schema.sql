@@ -9,9 +9,20 @@
 -- Cómo ejecutar: Supabase → SQL Editor → New query → pegar todo → Run.
 -- Es seguro volver a correrlo: todas las sentencias usan
 -- IF NOT EXISTS / ON CONFLICT DO NOTHING donde aplica.
+--
+-- ESQUEMA DEDICADO: este proyecto Supabase es compartido con otras apps de ISTHO
+-- (EXTRACCIÓN OP, Barbería), así que todas las tablas de INFRATELCO viven en su propio
+-- esquema "infratelco" en vez de "public", para no mezclarse ni chocar de nombres con
+-- las tablas de esas otras apps. Después de correr este script, hay que agregar
+-- "infratelco" en Supabase → Project Settings → API → Data API Settings →
+-- Exposed schemas (si no, la API no lo deja consultar). Ver documentation/database.md.
 -- =====================================================================
 
-create extension if not exists "pgcrypto";
+create extension if not exists "pgcrypto" schema public;
+
+create schema if not exists infratelco;
+
+set search_path to infratelco, public;
 
 -- ---------------------------------------------------------------------
 -- ROLES

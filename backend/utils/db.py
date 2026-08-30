@@ -14,14 +14,20 @@ SQL_CREAR_TABLAS = (
     config.RAIZ / "database" / "migrations" / "001_initial_schema.sql"
 ).read_text(encoding="utf-8")
 
+# El proyecto de Supabase es compartido con otras apps de ISTHO (EXTRACCIÓN OP, Barbería).
+# Todas las tablas de esta app viven en su propio esquema para no chocar con las de ellas.
+# Ver la nota al inicio de database/migrations/001_initial_schema.sql.
+ESQUEMA = "infratelco"
+
 
 @lru_cache(maxsize=1)
 def cliente():
     if not disponible():
         return None
     from supabase import create_client
+    from supabase.lib.client_options import ClientOptions
 
-    return create_client(config.SUPABASE_URL, config.SUPABASE_KEY)
+    return create_client(config.SUPABASE_URL, config.SUPABASE_KEY, options=ClientOptions(schema=ESQUEMA))
 
 
 def disponible() -> bool:
@@ -43,5 +49,12 @@ def probar_conexion() -> tuple[bool, str]:
                 "Conexión OK, pero las tablas todavía no existen. "
                 "Ejecuta el SQL de database/migrations/001_initial_schema.sql "
                 "en el SQL Editor de Supabase."
+            )
+        if "schema must be one of" in mensaje or "PGRST106" in mensaje or "PGRST002" in mensaje:
+            return False, (
+                f'Conexión OK, pero el esquema "{ESQUEMA}" no está habilitado en la API. '
+                "Ve a Supabase → Project Settings → API → Data API Settings → Exposed schemas, "
+                f'agrega "{ESQUEMA}" y guarda. Si las tablas tampoco existen todavía, primero '
+                "ejecuta database/migrations/001_initial_schema.sql en el SQL Editor."
             )
         return False, f"No se pudo conectar: {mensaje}"

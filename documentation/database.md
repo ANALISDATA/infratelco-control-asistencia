@@ -1,7 +1,18 @@
 # Base de datos — INFRATELCO Control de Asistencia
 
-Motor: **PostgreSQL** vía Supabase. Esquema completo en
-`database/migrations/001_initial_schema.sql` — se creó de una sola vez, con todas las
+Motor: **PostgreSQL** vía Supabase. El proyecto de Supabase (plan gratuito) es
+**compartido** con otras apps de ISTHO (EXTRACCIÓN OP, Barbería) — el plan free solo
+permite 2 proyectos y ya estaban en uso. Para no mezclar ni chocar con las tablas de esas
+apps, todas las tablas de INFRATELCO viven en su **propio esquema de PostgreSQL,
+`infratelco`**, en vez del esquema `public` que usan las otras. Es el mismo mecanismo de
+aislamiento que usarían proyectos separados, pero dentro del mismo proyecto Supabase.
+
+Después de correr la migración hay que habilitar ese esquema en la API (un paso único,
+manual, en el panel de Supabase): **Project Settings → API → Data API Settings → Exposed
+schemas** → agregar `infratelco`. Sin ese paso, PostgREST rechaza las consultas aunque las
+tablas ya existan (`db.probar_conexion()` detecta este caso específico y lo explica).
+
+Esquema completo en `database/migrations/001_initial_schema.sql` — se creó de una sola vez, con todas las
 tablas de todas las fases (secciones 43-44 del encargo), para no tener que hacer
 migraciones que reestructuren tablas ya usadas más adelante. La lógica de aplicación de
 la Fase 1 solo usa el subconjunto necesario para autenticación, empleados, auditoría y

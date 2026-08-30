@@ -6,9 +6,13 @@ Uso:
     2. Ejecuta:  python Conectar_Supabase.py
     3. Si dice que faltan las tablas, copia el SQL que imprime, pégalo en
        Supabase → SQL Editor → New query, y dale RUN.
-    4. Vuelve a ejecutar este script para confirmar.
+    4. Si dice que falta habilitar el esquema "infratelco" en la API, ve a
+       Project Settings → API → Data API Settings → Exposed schemas y agrégalo.
+    5. Vuelve a ejecutar este script para confirmar.
 
-No borra ni modifica nada existente.
+Este proyecto Supabase puede ser el mismo que ya usan otras apps de ISTHO — las tablas
+de INFRATELCO viven en su propio esquema ("infratelco"), así que no tocan ni se mezclan
+con las de esas apps. No borra ni modifica nada existente.
 """
 import sys
 from pathlib import Path
@@ -28,14 +32,18 @@ def main() -> int:
     print(("✔ " if ok else "✖ ") + mensaje)
     print()
 
-    if not ok and "tablas todavía no existen" not in mensaje:
-        print("Revisa .streamlit/secrets.toml (o .env) con los valores de tu proyecto Supabase.")
-        return 1
-
-    if not ok:
+    if not ok and "tablas todavía no existen" in mensaje:
         print("-" * 70)
         print(db.SQL_CREAR_TABLAS)
         print("-" * 70)
+        return 1
+
+    if not ok and "esquema" in mensaje:
+        # El mensaje de db.probar_conexion() ya trae los pasos exactos a seguir.
+        return 1
+
+    if not ok:
+        print("Revisa .streamlit/secrets.toml (o .env) con los valores de tu proyecto Supabase.")
         return 1
 
     print("Listo. Ahora puedes crear el primer administrador con:")
