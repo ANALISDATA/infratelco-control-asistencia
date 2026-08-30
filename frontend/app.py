@@ -45,15 +45,24 @@ if usuario.must_change_password:
 branding.aplicar_estilo()
 
 if usuario.role_code == Role.ADMIN:
+    # url_path explícito a propósito: st.navigation infiere la URL del nombre de la
+    # función, y todas estas son lambdas -> todas se llaman "<lambda>" y chocan
+    # ("Multiple Pages specified with URL pathname <lambda>"). Bug real encontrado
+    # probando el login completo contra la base de datos real.
     paginas = [
-        st.Page(lambda: admin_dashboard_page.render(usuario), title="Dashboard", icon="📊", default=True),
-        st.Page(lambda: admin_employees_page.render(usuario), title="Empleados", icon="👥"),
-        st.Page(lambda: admin_settings_page.render(usuario), title="Configuración", icon="⚙️"),
-        st.Page(lambda: admin_audit_page.render(usuario), title="Auditoría", icon="🛡️"),
+        st.Page(lambda: admin_dashboard_page.render(usuario), title="Dashboard", icon="📊",
+                url_path="dashboard", default=True),
+        st.Page(lambda: admin_employees_page.render(usuario), title="Empleados", icon="👥",
+                url_path="empleados"),
+        st.Page(lambda: admin_settings_page.render(usuario), title="Configuración", icon="⚙️",
+                url_path="configuracion"),
+        st.Page(lambda: admin_audit_page.render(usuario), title="Auditoría", icon="🛡️",
+                url_path="auditoria"),
     ]
 else:
     paginas = [
-        st.Page(lambda: employee_home_page.render(usuario), title="Mi cuenta", icon="👤", default=True),
+        st.Page(lambda: employee_home_page.render(usuario), title="Mi cuenta", icon="👤",
+                url_path="mi-cuenta", default=True),
     ]
 
 with st.sidebar:

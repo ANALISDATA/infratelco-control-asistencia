@@ -20,10 +20,17 @@ from backend.models import User
 from backend.services.auth import auth_service
 
 NOMBRE_COOKIE = "infratelco_session"
+_CLAVE_CONTROLADOR = "_cookie_controller"
 
 
 def _controlador() -> CookieController:
-    return CookieController()
+    # CookieController() escribe en st.session_state al crearse (para el widget que lo
+    # respalda); crearlo dos veces en el mismo rerun revienta con
+    # "cannot be modified after the widget... is instantiated". Se cachea una sola
+    # instancia por rerun.
+    if _CLAVE_CONTROLADOR not in st.session_state:
+        st.session_state[_CLAVE_CONTROLADOR] = CookieController()
+    return st.session_state[_CLAVE_CONTROLADOR]
 
 
 def usuario_actual() -> User | None:
