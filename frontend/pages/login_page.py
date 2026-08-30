@@ -13,6 +13,11 @@ def render() -> None:
     with columnas[1]:
         branding.encabezado("Control de Asistencia")
 
+        if branding.MASCOTA_PATH.exists():
+            col_mascota = st.columns([1, 1, 1])
+            with col_mascota[1]:
+                st.image(str(branding.MASCOTA_PATH), width=150)
+
         if not db.disponible():
             st.error(
                 "La aplicación todavía no está conectada a la base de datos. "

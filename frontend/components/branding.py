@@ -6,6 +6,7 @@ import streamlit as st
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
 LOGO_PATH = RAIZ / "assets" / "logos" / "infratelco_logo.png"
+MASCOTA_PATH = RAIZ / "assets" / "images" / "mascota_infratelco.png"
 
 AZUL_OSCURO = "#00226E"
 AZUL = "#007CD0"
