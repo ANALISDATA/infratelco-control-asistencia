@@ -92,6 +92,11 @@ def registrar_ingreso(empleado: Employee, resultado_navegador: dict | None,
     if attendance_repository.obtener_por_empleado_y_fecha(empleado.id, hoy):
         raise AttendanceError("Ya registraste tu ingreso hoy.")
 
+    # Obligatorio (regla del cliente): sin obra/trabajo no hay registro. Se valida aquí
+    # -- no solo en la pantalla -- porque nunca se confía únicamente en el frontend.
+    if not comentario or not comentario.strip():
+        raise AttendanceError("Debes indicar la obra o el trabajo que vas a realizar para registrar el ingreso.")
+
     ajustes = company_settings_repository.obtener()
     ubicacion, advertencia = _resolver_ubicacion(
         resultado_navegador, ajustes.min_gps_accuracy_m,

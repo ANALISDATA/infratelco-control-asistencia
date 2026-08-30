@@ -101,34 +101,42 @@ def render(usuario: User) -> None:
         st.markdown("### Registrar salida")
         resultado_gps = _bloque_ubicacion("gps_salida")
         if st.button("REGISTRAR SALIDA", type="primary", width="stretch"):
-            try:
-                resultado = attendance_service.registrar_salida(empleado, resultado_gps)
-            except attendance_service.AttendanceError as error:
-                st.error(str(error))
+            if resultado_gps is None:
+                st.error("Debes permitir tu ubicación antes de registrar la salida.")
             else:
-                for advertencia in resultado.advertencias:
-                    st.warning(advertencia)
-                st.session_state.pop("gps_salida_solicitada", None)
-                st.rerun()
+                try:
+                    resultado = attendance_service.registrar_salida(empleado, resultado_gps)
+                except attendance_service.AttendanceError as error:
+                    st.error(str(error))
+                else:
+                    for advertencia in resultado.advertencias:
+                        st.warning(advertencia)
+                    st.session_state.pop("gps_salida_solicitada", None)
+                    st.rerun()
 
     else:
         st.markdown("### Registrar ingreso")
         comentario = st.text_input(
-            "Obra o trabajo a realizar (opcional)",
+            "Obra o trabajo a realizar *",
             key="comentario_ingreso",
             placeholder="Ej: Obra Torre Norte — instalación eléctrica",
         )
         resultado_gps = _bloque_ubicacion("gps_ingreso")
         if st.button("REGISTRAR INGRESO", type="primary", width="stretch"):
-            try:
-                resultado = attendance_service.registrar_ingreso(empleado, resultado_gps, comentario)
-            except attendance_service.AttendanceError as error:
-                st.error(str(error))
+            if not comentario or not comentario.strip():
+                st.error("Debes indicar la obra o el trabajo que vas a realizar.")
+            elif resultado_gps is None:
+                st.error("Debes permitir tu ubicación antes de registrar el ingreso.")
             else:
-                for advertencia in resultado.advertencias:
-                    st.warning(advertencia)
-                st.session_state.pop("gps_ingreso_solicitada", None)
-                st.rerun()
+                try:
+                    resultado = attendance_service.registrar_ingreso(empleado, resultado_gps, comentario)
+                except attendance_service.AttendanceError as error:
+                    st.error(str(error))
+                else:
+                    for advertencia in resultado.advertencias:
+                        st.warning(advertencia)
+                    st.session_state.pop("gps_ingreso_solicitada", None)
+                    st.rerun()
 
     st.divider()
     with st.expander("Mis últimos registros"):

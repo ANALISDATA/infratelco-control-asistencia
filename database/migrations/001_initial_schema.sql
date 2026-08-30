@@ -257,7 +257,7 @@ create table if not exists company_settings (
     min_gps_accuracy_m              numeric(8,2) not null default 50,
     require_location_check_in       boolean not null default true,
     require_location_check_out      boolean not null default true,
-    on_location_failure             text not null default 'allow_with_warning'
+    on_location_failure             text not null default 'block'
                                         check (on_location_failure in ('block','allow_with_warning')),
     geofence_latitude               numeric(10,7),
     geofence_longitude              numeric(10,7),

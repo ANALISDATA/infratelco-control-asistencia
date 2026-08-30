@@ -1,12 +1,20 @@
+import secrets
+import string
 from datetime import date
 
 import pandas as pd
 import streamlit as st
 
 from backend.models import Employee, User
-from backend.repositories import employee_repository
+from backend.repositories import employee_repository, user_repository
+from backend.services.auth import auth_service
 from backend.services.employees import employee_service
 from backend.services.schedules import schedule_service
+
+
+def _generar_password_temporal() -> str:
+    alfabeto = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alfabeto) for _ in range(12))
 
 
 def _opciones_horario() -> dict[str, str | None]:
@@ -142,7 +150,7 @@ def _tabla_empleados(admin: User) -> None:
         st.success("Cambios guardados.")
         st.rerun()
 
-    col_a, col_b = st.columns(2)
+    col_a, col_b, col_c = st.columns(3)
     with col_a:
         if empleado.is_active and st.button("Desactivar empleado", key=f"desactivar_{empleado.id}"):
             employee_service.desactivar_empleado(admin, empleado.id)
@@ -153,6 +161,24 @@ def _tabla_empleados(admin: User) -> None:
             employee_service.activar_empleado(admin, empleado.id)
             st.success(f"{empleado.full_name} reactivado.")
             st.rerun()
+    with col_c:
+        # Resuelve "no me sé la clave" al instante, sin depender de un correo que
+        # todavía no está conectado (ver documentation/notifications.md) -- y sin
+        # que la contraseña real de nadie se guarde en texto plano ni se muestre
+        # nunca (regla de seguridad del proyecto).
+        if st.button("🔑 Restablecer contraseña", key=f"reset_pw_{empleado.id}"):
+            usuario_empleado = user_repository.obtener_por_documento(empleado.document_id)
+            if usuario_empleado is None:
+                st.error("Este empleado no tiene un usuario de acceso asociado.")
+            else:
+                password_temporal = _generar_password_temporal()
+                auth_service.restablecer_password_administrador(admin, usuario_empleado, password_temporal)
+                st.success(f"Contraseña restablecida para {empleado.full_name}.")
+                st.warning(
+                    f"Nueva contraseña temporal: `{password_temporal}`\n\n"
+                    "Entrégasela por un canal seguro. Se le pedirá cambiarla en su "
+                    "próximo ingreso — así queda registrado en Auditoría."
+                )
 
 
 def render(admin: User) -> None:
