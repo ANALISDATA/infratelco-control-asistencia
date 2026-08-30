@@ -1,11 +1,14 @@
+from datetime import timedelta
+
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from backend.models import User
 from backend.repositories import attendance_repository
 from backend.services.employees import employee_service
 from backend.utils.timezone import ahora
-from frontend.components import charts
+from frontend.components import branding, charts
 
 
 def render(admin: User) -> None:
@@ -43,9 +46,43 @@ def render(admin: User) -> None:
                 dominio=["Puntuales", "Tarde", "No marcaron"],
                 rango=[charts.VERDE_ESTADO, charts.AMBAR_ESTADO, charts.GRIS_ESTADO],
                 altura=200,
+                oscuro=branding.es_oscuro(),
             ),
             width="stretch",
         )
+
+    st.divider()
+    st.markdown("##### Tendencia de asistencia (últimos 14 días)")
+    dias = [hoy - timedelta(days=i) for i in range(13, -1, -1)]
+    registros_rango = attendance_repository.listar_por_rango(dias[0], hoy)
+    por_dia = {d: {"puntuales": 0, "tarde": 0} for d in dias}
+    for r in registros_rango:
+        if r.work_date in por_dia:
+            if r.check_in_status == "on_time":
+                por_dia[r.work_date]["puntuales"] += 1
+            elif r.check_in_status == "late":
+                por_dia[r.work_date]["tarde"] += 1
+    df_tendencia = pd.DataFrame(
+        [
+            {"Día": d.strftime("%d/%m"), "Puntuales": v["puntuales"], "Tarde": v["tarde"]}
+            for d, v in por_dia.items()
+        ]
+    )
+    altura_tendencia = 300
+    chart_tendencia = charts.tendencia_lineas(
+        df_tendencia, "Día",
+        series=[
+            ("Puntuales", charts.VERDE_ESTADO, "Puntuales"),
+            ("Tarde", charts.AMBAR_ESTADO, "Tarde"),
+        ],
+        oscuro=branding.es_oscuro(),
+        altura=altura_tendencia,
+    )
+    # st.altair_chart (el puente Arrow de Streamlit) no calcula bien la escala en este
+    # gráfico con varias series superpuestas -- eje vacío / "Infinite extent" en la
+    # consola, verificado con Playwright. Se incrusta como HTML/vega-embed directo
+    # (el mismo mecanismo ya probado y funcionando) para evitar ese puente por completo.
+    components.html(chart_tendencia.to_html(), height=altura_tendencia + 40, scrolling=False)
 
     st.divider()
     st.markdown("##### Personal")
@@ -68,6 +105,7 @@ def render(admin: User) -> None:
                     df_estado, "Estado", "Empleados",
                     dominio=["Activos", "Inactivos"],
                     rango=[charts.VERDE_ESTADO, charts.GRIS_ESTADO],
+                    oscuro=branding.es_oscuro(),
                 ),
                 width="stretch",
             )
@@ -79,6 +117,6 @@ def render(admin: User) -> None:
                 .reset_index(name="Empleados")
             )
             st.altair_chart(
-                charts.barras_magnitud(df_area, "Área", "Empleados"),
+                charts.barras_magnitud(df_area, "Área", "Empleados", oscuro=branding.es_oscuro()),
                 width="stretch",
             )

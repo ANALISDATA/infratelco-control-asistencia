@@ -13,7 +13,11 @@ supabase==2.31.0           # cliente de la base de datos (Supabase/PostgreSQL). 
 bcrypt>=4.1,<5             # hashing de contraseñas (passlib se descartó: incompatible con bcrypt>=4.1, ver tests)
 openpyxl>=3.1,<4          # generación del Excel corporativo
 pandas>=2.2,<4            # tablas para dashboard/histórico/Excel
-altair>=5,<7               # gráficos del dashboard (mismo motor que EXTRACCION OP)
+altair==6.2.2               # gráficos del dashboard. Fijo: st.altair_chart() no calcula bien
+                             # el eje en el gráfico de tendencia con esta combinación de
+                             # versiones -- ver frontend/pages/admin_dashboard_page.py, donde
+                             # ese gráfico específico se incrusta como HTML directo en vez de
+                             # usar el puente Arrow de Streamlit. Probado con esta versión exacta.
 requests>=2.31,<3         # llamadas a Nominatim (reverse geocoding)
 streamlit-js-eval==1.0.0  # pedir ubicación GPS al navegador (Geolocation API)
 python-dateutil>=2.9,<3   # cálculos de fechas/horas

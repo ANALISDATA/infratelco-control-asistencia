@@ -40,6 +40,19 @@ def listar_por_fecha(work_date: date) -> list[AttendanceRecord]:
     return [AttendanceRecord.from_row(r) for r in respuesta.data]
 
 
+def listar_por_rango(fecha_inicio: date, fecha_fin: date) -> list[AttendanceRecord]:
+    respuesta = (
+        db.cliente()
+        .table("attendance_records")
+        .select("*")
+        .gte("work_date", fecha_inicio.isoformat())
+        .lte("work_date", fecha_fin.isoformat())
+        .order("work_date")
+        .execute()
+    )
+    return [AttendanceRecord.from_row(r) for r in respuesta.data]
+
+
 def listar_por_empleado(employee_id: str, pagina: int = 1, por_pagina: int = 30) -> list[AttendanceRecord]:
     desde = (pagina - 1) * por_pagina
     hasta = desde + por_pagina - 1

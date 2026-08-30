@@ -34,9 +34,56 @@ _SVG_CIRCUITO = """
   </g>
 </svg>
 """.strip()
-_SVG_CIRCUITO_URI = "data:image/svg+xml," + quote(_SVG_CIRCUITO)
+SVG_CIRCUITO_URI = "data:image/svg+xml," + quote(_SVG_CIRCUITO)
+FONDO_CIRCUITO_CSS = (
+    "background-image: radial-gradient(circle at 15% 0%, rgba(0,124,208,0.35) 0%, transparent 55%), "
+    f'url("{SVG_CIRCUITO_URI}"); '
+    "background-repeat: no-repeat, repeat; background-size: auto, 140px 140px;"
+)
 
-CSS = f"""
+# --- Modo claro/oscuro ---------------------------------------------------
+# El sidebar se queda siempre azul oscuro de marca (es identidad, no "modo").
+# Lo que cambia es el fondo de la página y las tarjetas/texto del contenido.
+# Colores del modo oscuro validados por contraste real contra su propio fondo
+# (no elegidos a ojo) -- ver el chequeo hecho con la misma herramienta que
+# valida los gráficos: azul claro 6.84:1, verde 8.05:1, dorado 11.94:1,
+# texto principal 14.32:1, texto secundario 7.11:1, todos sobre #0F1522.
+CLAVE_TEMA = "tema_oscuro"
+
+
+def es_oscuro() -> bool:
+    return bool(st.session_state.get(CLAVE_TEMA, False))
+
+
+def alternar_tema() -> None:
+    st.session_state[CLAVE_TEMA] = not es_oscuro()
+
+
+def _tokens(oscuro: bool) -> dict:
+    if oscuro:
+        return dict(
+            bg_pagina="#0F1522",
+            bg_tarjeta="#1A2236",
+            borde_tarjeta="rgba(255,255,255,0.08)",
+            texto_principal="#E5E7EB",
+            texto_secundario="#9AA5B4",
+            acento_titulo="#4FA8E8",
+            sombra="rgba(0,0,0,0.45)",
+        )
+    return dict(
+        bg_pagina="#F4F6FA",
+        bg_tarjeta=BLANCO,
+        borde_tarjeta="rgba(0,34,110,0.06)",
+        texto_principal="#14213D",
+        texto_secundario="#6B7280",
+        acento_titulo=AZUL_OSCURO,
+        sombra="rgba(0,34,110,0.18)",
+    )
+
+
+def _css(oscuro: bool) -> str:
+    t = _tokens(oscuro)
+    return f"""
 <style>
 :root {{
     --infratelco-azul-oscuro: {AZUL_OSCURO};
@@ -45,15 +92,14 @@ CSS = f"""
     --infratelco-dorado: {DORADO};
 }}
 .stApp {{
-    background-color: #F4F6FA;
+    background-color: {t['bg_pagina']} !important;
+}}
+.stApp, .stApp p, .stApp span, .stApp li, .stApp label {{
+    color: {t['texto_principal']};
 }}
 [data-testid="stSidebar"] {{
     background-color: {AZUL_OSCURO};
-    background-image:
-        radial-gradient(circle at 15% 0%, rgba(0,124,208,0.35) 0%, transparent 55%),
-        url("{_SVG_CIRCUITO_URI}");
-    background-repeat: no-repeat, repeat;
-    background-size: auto, 140px 140px;
+    {FONDO_CIRCUITO_CSS}
 }}
 [data-testid="stSidebar"] * {{
     color: {BLANCO} !important;
@@ -130,22 +176,22 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
 }}
 /* Tarjetas de métricas (st.metric) -- fondo, sombra y acento de color */
 [data-testid="stMetric"] {{
-    background: {BLANCO};
+    background: {t['bg_tarjeta']};
     border-radius: 14px;
     padding: 1.1rem 1.25rem 1rem 1.25rem;
-    box-shadow: 0 6px 18px -8px rgba(0,34,110,0.18), 0 0 0 1px rgba(0,34,110,0.06);
+    box-shadow: 0 6px 18px -8px {t['sombra']}, 0 0 0 1px {t['borde_tarjeta']};
     border-top: 3px solid {AZUL};
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }}
 [data-testid="stMetric"]:hover {{
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px -8px rgba(0,34,110,0.25), 0 0 0 1px rgba(0,34,110,0.08);
+    box-shadow: 0 12px 24px -8px {t['sombra']}, 0 0 0 1px {t['borde_tarjeta']};
 }}
 [data-testid="stMetric"] {{
     min-height: 96px;
 }}
 [data-testid="stMetricLabel"], [data-testid="stMetricLabel"] p {{
-    color: #6B7280 !important;
+    color: {t['texto_secundario']} !important;
     font-weight: 600 !important;
     font-size: 0.78rem !important;
     text-transform: uppercase;
@@ -156,7 +202,7 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     line-height: 1.25 !important;
 }}
 [data-testid="stMetricValue"] {{
-    color: {AZUL_OSCURO} !important;
+    color: {t['acento_titulo']} !important;
     font-weight: 800 !important;
 }}
 
@@ -164,7 +210,7 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
    no <h1> (verificado con Playwright contra el DOM real). Más presencia, con
    acento de marca. */
 div[data-testid="stHeading"] h2 {{
-    color: {AZUL_OSCURO} !important;
+    color: {t['acento_titulo']} !important;
     font-weight: 800 !important;
     letter-spacing: -0.01em;
     padding-bottom: 0.6rem;
@@ -189,18 +235,35 @@ div[data-testid="stHeading"] h2::after {{
     margin-bottom: 1rem;
 }}
 .infratelco-tag {{
-    color: {AZUL_OSCURO};
+    color: {t['acento_titulo']};
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
     font-size: 0.85rem;
+}}
+
+/* Botón de modo claro/oscuro */
+.st-key-boton_tema button {{
+    border-radius: 999px !important;
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0 !important;
+    font-size: 1.1rem !important;
 }}
 </style>
 """
 
 
 def aplicar_estilo() -> None:
-    st.markdown(CSS, unsafe_allow_html=True)
+    st.markdown(_css(es_oscuro()), unsafe_allow_html=True)
+
+
+def boton_tema() -> None:
+    """Botón redondo (☀️/🌙) que alterna el fondo de la app entre claro y oscuro."""
+    with st.container(key="boton_tema"):
+        if st.button("☀️" if es_oscuro() else "🌙", help="Cambiar a modo claro/oscuro"):
+            alternar_tema()
+            st.rerun()
 
 
 def encabezado(subtitulo: str | None = None) -> None:

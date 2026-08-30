@@ -89,9 +89,13 @@ with st.sidebar:
         st.image(str(branding.LOGO_PATH), width="stretch")
     st.caption(f"Sesión: {usuario.email}")
     st.caption("Administrador" if usuario.role_code == Role.ADMIN else "Empleado")
-    if st.button("Cerrar sesión", width="stretch"):
-        cerrar_sesion()
-        st.rerun()
+    col_tema, col_salir = st.columns([1, 3])
+    with col_tema:
+        branding.boton_tema()
+    with col_salir:
+        if st.button("Cerrar sesión", width="stretch"):
+            cerrar_sesion()
+            st.rerun()
 
 navegacion = st.navigation(paginas)
 navegacion.run()

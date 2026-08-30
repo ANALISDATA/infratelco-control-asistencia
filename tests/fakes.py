@@ -55,6 +55,14 @@ class _ConsultaFalsa:
         self._filtros.append(("gt", col, val))
         return self
 
+    def gte(self, col, val):
+        self._filtros.append(("gte", col, val))
+        return self
+
+    def lte(self, col, val):
+        self._filtros.append(("lte", col, val))
+        return self
+
     def is_(self, col, val):
         self._filtros.append(("is", col, val))
         return self
@@ -80,6 +88,10 @@ class _ConsultaFalsa:
             if tipo == "neq" and actual == val:
                 return False
             if tipo == "gt" and not (actual is not None and str(actual) > str(val)):
+                return False
+            if tipo == "gte" and not (actual is not None and str(actual) >= str(val)):
+                return False
+            if tipo == "lte" and not (actual is not None and str(actual) <= str(val)):
                 return False
             if tipo == "is" and val == "null" and actual is not None:
                 return False

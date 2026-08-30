@@ -8,12 +8,14 @@ from frontend.components.session_state import iniciar_sesion
 _CSS_LOGIN = f"""
 <style>
 .stApp {{
-    background: #F4F6FA !important;
+    background-color: {branding.AZUL_OSCURO} !important;
+    {branding.FONDO_CIRCUITO_CSS}
 }}
 [data-testid="stHeader"] {{ background: transparent !important; }}
 
 .st-key-login_card {{
     background: radial-gradient(circle at 25% 10%, #003C9E 0%, {branding.AZUL_OSCURO} 55%, #00133F 100%);
+    outline: 1px solid rgba(255,255,255,0.10);
     border-radius: 20px;
     padding: 2.75rem 2.5rem 2.25rem 2.5rem;
     box-shadow: 0 25px 60px -12px rgba(0, 34, 110, 0.35), 0 0 0 1px rgba(0,34,110,0.08);
@@ -90,7 +92,7 @@ _CSS_LOGIN = f"""
 
 .login-footer {{
     text-align: center;
-    color: #6B7280;
+    color: rgba(255,255,255,0.55);
     font-size: 0.78rem;
     margin-top: 1.5rem;
     letter-spacing: 0.02em;
