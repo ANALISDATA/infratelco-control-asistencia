@@ -23,7 +23,7 @@ def _formulario_crear(admin: User) -> None:
                 area = st.text_input("Área / departamento")
                 fecha_ingreso = st.date_input("Fecha de ingreso", value=date.today())
 
-            enviar = st.form_submit_button("Crear empleado", use_container_width=True)
+            enviar = st.form_submit_button("Crear empleado", width="stretch")
 
         if enviar:
             if not nombre or not cedula or not correo:
@@ -82,7 +82,7 @@ def _tabla_empleados(admin: User) -> None:
             for e in empleados
         ]
     )
-    st.dataframe(df.drop(columns=["_id"]), use_container_width=True, hide_index=True)
+    st.dataframe(df.drop(columns=["_id"]), width="stretch", hide_index=True)
 
     st.markdown("#### Editar / activar / desactivar")
     opciones = {f"{e.full_name} — {e.document_id}": e for e in empleados}

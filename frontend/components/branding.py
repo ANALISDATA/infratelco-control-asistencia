@@ -67,7 +67,7 @@ def encabezado(subtitulo: str | None = None) -> None:
     columnas = st.columns([1, 4])
     with columnas[0]:
         if LOGO_PATH.exists():
-            st.image(str(LOGO_PATH), use_container_width=True)
+            st.image(str(LOGO_PATH), width="stretch")
     with columnas[1]:
         st.markdown(
             '<div class="infratelco-tag">Ingeniería Eléctrica e Infraestructura</div>',

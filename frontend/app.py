@@ -58,10 +58,10 @@ else:
 
 with st.sidebar:
     if branding.LOGO_PATH.exists():
-        st.image(str(branding.LOGO_PATH), use_container_width=True)
+        st.image(str(branding.LOGO_PATH), width="stretch")
     st.caption(f"Sesión: {usuario.email}")
     st.caption("Administrador" if usuario.role_code == Role.ADMIN else "Empleado")
-    if st.button("Cerrar sesión", use_container_width=True):
+    if st.button("Cerrar sesión", width="stretch"):
         cerrar_sesion()
         st.rerun()
 

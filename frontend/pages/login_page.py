@@ -24,7 +24,7 @@ def render() -> None:
         with st.form("form_login"):
             identificador = st.text_input("Cédula o correo electrónico")
             password = st.text_input("Contraseña", type="password")
-            enviar = st.form_submit_button("Ingresar", use_container_width=True)
+            enviar = st.form_submit_button("Ingresar", width="stretch")
 
         if enviar:
             if not identificador or not password:
@@ -35,5 +35,5 @@ def render() -> None:
             except auth_service.AuthError as error:
                 st.error(str(error))
                 return
-            iniciar_sesion(resultado.user, resultado.session_token)
+            iniciar_sesion(resultado)
             st.rerun()

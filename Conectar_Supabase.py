@@ -17,6 +17,10 @@ con las de esas apps. No borra ni modifica nada existente.
 import sys
 from pathlib import Path
 
+# La consola de Windows en español suele usar cp1252, que no sabe imprimir ✔/✖.
+# Se fuerza UTF-8 para que este script funcione igual en cualquier equipo.
+sys.stdout.reconfigure(encoding="utf-8")
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from backend.utils import db  # noqa: E402

@@ -9,6 +9,9 @@ import getpass
 import sys
 from pathlib import Path
 
+# La consola de Windows en español suele usar cp1252, que no sabe imprimir ✔/✖.
+sys.stdout.reconfigure(encoding="utf-8")
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from backend.models import Role  # noqa: E402

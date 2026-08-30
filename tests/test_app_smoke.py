@@ -10,8 +10,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from streamlit.testing.v1 import AppTest
 
+from backend import config
 
-def test_login_page_sin_supabase_no_revienta():
+
+def test_login_page_sin_supabase_no_revienta(monkeypatch):
+    # Se fuerza "sin credenciales" explícitamente: si la máquina donde corren las
+    # pruebas tiene un .streamlit/secrets.toml real (como este equipo, ya conectado a
+    # Supabase), el test no debe depender de ese estado ambiental para ser determinista.
+    monkeypatch.setattr(config, "SUPABASE_URL", None)
+    monkeypatch.setattr(config, "SUPABASE_KEY", None)
+
     at = AppTest.from_file(str(Path(__file__).resolve().parent.parent / "frontend" / "app.py"))
     at.run(timeout=15)
     assert not at.exception, f"La app lanzó una excepción: {at.exception}"

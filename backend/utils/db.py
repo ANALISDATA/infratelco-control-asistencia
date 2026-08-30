@@ -25,9 +25,11 @@ def cliente():
     if not disponible():
         return None
     from supabase import create_client
-    from supabase.lib.client_options import ClientOptions
+    from supabase.lib.client_options import SyncClientOptions
 
-    return create_client(config.SUPABASE_URL, config.SUPABASE_KEY, options=ClientOptions(schema=ESQUEMA))
+    return create_client(
+        config.SUPABASE_URL, config.SUPABASE_KEY, options=SyncClientOptions(schema=ESQUEMA)
+    )
 
 
 def disponible() -> bool:

@@ -16,7 +16,7 @@ def render(usuario: User) -> None:
             actual = st.text_input("Contraseña actual / temporal", type="password")
             nueva = st.text_input("Nueva contraseña", type="password")
             confirmar = st.text_input("Confirmar nueva contraseña", type="password")
-            enviar = st.form_submit_button("Guardar y continuar", use_container_width=True)
+            enviar = st.form_submit_button("Guardar y continuar", width="stretch")
 
         if enviar:
             if nueva != confirmar:

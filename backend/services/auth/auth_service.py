@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from backend import config
-from backend.models import User
+from backend.models import Role, User
 from backend.repositories import session_repository, user_repository
 from backend.services.audit import audit_service
 from backend.utils import security
@@ -29,6 +29,11 @@ MENSAJE_CREDENCIALES_INVALIDAS = "Cédula/correo o contraseña incorrectos."
 class ResultadoLogin:
     user: User
     session_token: str
+    session_ttl_hours: int
+
+
+def _ttl_horas(role_code: str) -> int:
+    return config.SESSION_TTL_HOURS_ADMIN if role_code == Role.ADMIN else config.SESSION_TTL_HOURS_EMPLOYEE
 
 
 def _es_correo(identificador: str) -> bool:
@@ -75,14 +80,15 @@ def login(identificador: str, password: str, ip_address: str | None = None,
     user_repository.registrar_login_exitoso(usuario.id, momento)
 
     token, token_hash = security.generar_token()
-    expira = momento + timedelta(hours=config.SESSION_TTL_HOURS)
+    ttl_horas = _ttl_horas(usuario.role_code)
+    expira = momento + timedelta(hours=ttl_horas)
     session_repository.crear(usuario.id, token_hash, expira, ip_address, user_agent)
 
     audit_service.registrar(usuario, "auth.login_success", "user", usuario.id, ip_address=ip_address)
 
     usuario.failed_login_attempts = 0
     usuario.locked_until = None
-    return ResultadoLogin(user=usuario, session_token=token)
+    return ResultadoLogin(user=usuario, session_token=token, session_ttl_hours=ttl_horas)
 
 
 def validar_sesion(session_token: str) -> User | None:

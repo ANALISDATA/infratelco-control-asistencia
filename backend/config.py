@@ -57,7 +57,12 @@ EMAIL_PROVIDER = leer("email_provider", "")
 EMAIL_API_KEY = leer("email_api_key", "")
 
 # Reglas de sesión y seguridad (no hardcodeadas en la lógica de negocio)
-SESSION_TTL_HOURS = 12
+# Los administradores manejan datos sensibles de todo el personal -> sesión corta.
+# Los empleados solo pueden ver/marcar su propia asistencia -> sesión larga, para que
+# no tengan que iniciar sesión cada día desde el celular en obra (pedido explícito del
+# usuario: la mayoría son operarios/albañiles, el login repetido es fricción real).
+SESSION_TTL_HOURS_ADMIN = 12
+SESSION_TTL_HOURS_EMPLOYEE = 24 * 30  # 30 días
 MAX_FAILED_LOGIN_ATTEMPTS = 5
 LOGIN_LOCKOUT_MINUTES = 15
 PASSWORD_RESET_TTL_MINUTES = 30
