@@ -141,16 +141,44 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     transform: translateY(-2px);
     box-shadow: 0 12px 24px -8px rgba(0,34,110,0.25), 0 0 0 1px rgba(0,34,110,0.08);
 }}
+[data-testid="stMetric"] {{
+    min-height: 96px;
+}}
 [data-testid="stMetricLabel"] {{
     color: #6B7280 !important;
     font-weight: 600 !important;
-    font-size: 0.82rem !important;
+    font-size: 0.78rem !important;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1.25 !important;
 }}
 [data-testid="stMetricValue"] {{
     color: {AZUL_OSCURO} !important;
     font-weight: 800 !important;
+}}
+
+/* Títulos de página (st.header) -- más presencia, con acento de marca */
+div[data-testid="stHeading"] h1 {{
+    color: {AZUL_OSCURO} !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.01em;
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.75rem !important;
+    position: relative;
+    display: inline-block;
+}}
+div[data-testid="stHeading"] h1::after {{
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    width: 64px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, {AZUL_OSCURO} 0%, {AZUL} 55%, {DORADO} 100%);
 }}
 
 .infratelco-brandbar {{
