@@ -4,6 +4,7 @@ import streamlit as st
 from backend.models import User
 from backend.repositories import attendance_repository
 from backend.services.employees import employee_service
+from backend.services.reports import excel_service
 from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
 
 
@@ -66,6 +67,14 @@ def render(admin: User) -> None:
             "Dirección entrada": st.column_config.TextColumn(width="medium"),
             "Dirección salida": st.column_config.TextColumn(width="medium"),
         },
+    )
+
+    excel_bytes = excel_service.generar_reporte_asistencia(fecha, filas)
+    st.download_button(
+        "📥 Descargar Excel",
+        data=excel_bytes,
+        file_name=f"infratelco_asistencia_{fecha.isoformat()}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
     with st.expander("Ver coordenadas originales (latitud / longitud)"):
