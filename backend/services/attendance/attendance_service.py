@@ -170,13 +170,21 @@ def registrar_salida(empleado: Employee, resultado_navegador: dict | None) -> Re
 
     minutos_trabajados = int((momento - registro_existente.check_in_at).total_seconds() // 60)
 
-    # Horas extra: lo que pase de la hora de salida esperada ESE día (horario propio del
-    # empleado si tiene uno asignado, si no el predeterminado de la empresa) -- se calcula
-    # y se guarda aquí, no se recalcula después, para que quede fijo con la configuración
-    # vigente ese día (mismo criterio que ya se usa para check_in_status).
+    # Horas extra: lo que el empleado trabajó de más sobre la DURACIÓN de su jornada
+    # esperada (horario propio si tiene uno asignado, si no el predeterminado de la
+    # empresa) -- nunca comparando solo el reloj de salida contra la hora de salida
+    # esperada, porque si el ingreso fue tarde eso da horas extra que no existen (ej.
+    # entra a las 19:14 cuando la jornada ya cerraba a las 17:00, sale a las 20:20
+    # habiendo trabajado apenas 1h05m -> comparar contra el reloj daba "3h20m extra",
+    # imposible: nunca puede haber más minutos extra que minutos realmente trabajados).
+    # Se calcula y se guarda aquí, no se recalcula después, para que quede fijo con la
+    # configuración vigente ese día (mismo criterio que ya se usa para check_in_status).
     hora_salida_esperada = _hora_salida_esperada(empleado, hoy)
     esperado_salida_dt = datetime.combine(hoy, hora_salida_esperada, tzinfo=BOGOTA)
-    minutos_extra = max(0, int((momento - esperado_salida_dt).total_seconds() // 60))
+    duracion_esperada_minutos = max(
+        0, int((esperado_salida_dt - registro_existente.check_in_expected_at).total_seconds() // 60)
+    )
+    minutos_extra = max(0, minutos_trabajados - duracion_esperada_minutos)
 
     cambios = {
         "check_out_at": momento.isoformat(),

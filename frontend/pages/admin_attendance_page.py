@@ -17,18 +17,20 @@ def render(admin: User) -> None:
 
     empleados = employee_service.listar_empleados(solo_activos=True, por_pagina=1000)
 
+    fecha_str = fecha.strftime("%d/%m/%Y")
     filas = []
     for empleado in empleados:
         registro = registros_por_empleado.get(empleado.id)
         if registro is None:
             filas.append({
-                "Empleado": empleado.full_name, "Entrada": "—", "Estado": "No marcó",
+                "Empleado": empleado.full_name, "Fecha": fecha_str, "Entrada": "—", "Estado": "No marcó",
                 "Salida": "—", "Horas trab.": "—", "Horas extra": "—",
                 "Obra / trabajo": "—", "Dirección entrada": "—", "Dirección salida": "—",
             })
         else:
             filas.append({
                 "Empleado": empleado.full_name,
+                "Fecha": fecha_str,
                 "Entrada": formato_hora(registro.check_in_at) if registro.check_in_at else "—",
                 "Estado": "Puntual" if registro.check_in_status == "on_time" else "Tarde",
                 "Salida": formato_hora(registro.check_out_at) if registro.check_out_at else "Sin salida",
@@ -58,6 +60,7 @@ def render(admin: User) -> None:
         df, width="stretch", hide_index=True,
         column_config={
             "Empleado": st.column_config.TextColumn(width="medium"),
+            "Fecha": st.column_config.TextColumn(width="small"),
             "Entrada": st.column_config.TextColumn(width="small"),
             "Estado": st.column_config.TextColumn(width="small"),
             "Salida": st.column_config.TextColumn(width="small"),
