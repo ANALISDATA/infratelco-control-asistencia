@@ -22,7 +22,11 @@ import streamlit as st  # noqa: E402
 
 from backend.models import Role  # noqa: E402
 from frontend.components import branding  # noqa: E402
-from frontend.components.session_state import cerrar_sesion, usuario_actual  # noqa: E402
+from frontend.components.session_state import (  # noqa: E402
+    cerrar_sesion,
+    guardar_sesion_pendiente,
+    usuario_actual,
+)
 from frontend.pages import (  # noqa: E402
     admin_attendance_page,
     admin_audit_page,
@@ -48,6 +52,8 @@ if usuario is None:
     paginas = [st.Page(login_page.render, title="Ingresar", url_path="login", default=True)]
     st.navigation(paginas, position="hidden").run()
     st.stop()
+
+guardar_sesion_pendiente()
 
 if usuario.must_change_password:
     paginas = [

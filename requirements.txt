@@ -4,8 +4,6 @@
 # con versiones abiertas, un reinicio del servidor puede traer una actualización ajena
 # (streamlit o una de sus dependencias) que rompa la app sin que se haya tocado el código.
 streamlit==1.60.0
-streamlit-cookies-controller>=0.0.4,<1  # sesion persistente en el navegador (empleados no
-                                          # tienen que volver a loguearse cada dia)
 
 supabase==2.31.0           # cliente de la base de datos (Supabase/PostgreSQL). Fijo: la clase
                             # SyncClientOptions que usa backend/utils/db.py cambió de forma
@@ -19,6 +17,9 @@ altair==6.2.2               # gráficos del dashboard. Fijo: st.altair_chart() n
                              # ese gráfico específico se incrusta como HTML directo en vez de
                              # usar el puente Arrow de Streamlit. Probado con esta versión exacta.
 requests>=2.31,<3         # llamadas a Nominatim (reverse geocoding)
-streamlit-js-eval==1.0.0  # pedir ubicación GPS al navegador (Geolocation API)
+streamlit-js-eval==1.0.0  # pedir ubicación GPS al navegador (Geolocation API), y guardar la
+                          # sesión en localStorage (streamlit-cookies-controller se descartó:
+                          # su set() nunca escribe la cookie de verdad -- bug conocido de esa
+                          # librería, sin resolver -- ver frontend/components/session_state.py)
 python-dateutil>=2.9,<3   # cálculos de fechas/horas
 tzdata>=2024.1            # base de datos de zonas horarias (necesaria en Windows)

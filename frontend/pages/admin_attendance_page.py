@@ -22,8 +22,8 @@ def render(admin: User) -> None:
         if registro is None:
             filas.append({
                 "Empleado": empleado.full_name, "Entrada": "—", "Estado": "No marcó",
-                "Salida": "—", "Horas trabajadas": "—", "Horas extra": "—",
-                "Obra / trabajo": "—",
+                "Salida": "—", "Horas trab.": "—", "Horas extra": "—",
+                "Obra / trabajo": "—", "Dirección entrada": "—", "Dirección salida": "—",
             })
         else:
             filas.append({
@@ -31,9 +31,11 @@ def render(admin: User) -> None:
                 "Entrada": formato_hora(registro.check_in_at) if registro.check_in_at else "—",
                 "Estado": "Puntual" if registro.check_in_status == "on_time" else "Tarde",
                 "Salida": formato_hora(registro.check_out_at) if registro.check_out_at else "Sin salida",
-                "Horas trabajadas": formato_horas_minutos(registro.worked_minutes),
+                "Horas trab.": formato_horas_minutos(registro.worked_minutes),
                 "Horas extra": formato_horas_minutos(registro.overtime_minutes) if registro.overtime_minutes else "—",
                 "Obra / trabajo": registro.observation or "—",
+                "Dirección entrada": registro.check_in_address or "—",
+                "Dirección salida": registro.check_out_address or "—",
             })
 
     if not filas:
@@ -48,19 +50,23 @@ def render(admin: User) -> None:
     col3.metric("No marcaron", (df["Estado"] == "No marcó").sum())
     col4.metric("Sin salida", (df["Salida"] == "Sin salida").sum())
 
-    st.dataframe(df, width="stretch", hide_index=True)
-
-    with st.expander("Ver direcciones de entrada y salida"):
-        filas_direcciones = [
-            {
-                "Empleado": empleado.full_name,
-                "Dirección entrada": (registro.check_in_address or "—") if registro else "—",
-                "Dirección salida": (registro.check_out_address or "—") if registro else "—",
-            }
-            for empleado in empleados
-            for registro in [registros_por_empleado.get(empleado.id)]
-        ]
-        st.dataframe(pd.DataFrame(filas_direcciones), width="stretch", hide_index=True)
+    # Columnas cortas (hora, estado, horas) angostas a propósito -- para que quepa todo
+    # sin tener que deslizar la tabla, incluyendo Empleado en cada fila (con más de 20
+    # personas no sirve de nada ver "Obra copacabana" sin saber de quién es).
+    st.dataframe(
+        df, width="stretch", hide_index=True,
+        column_config={
+            "Empleado": st.column_config.TextColumn(width="medium"),
+            "Entrada": st.column_config.TextColumn(width="small"),
+            "Estado": st.column_config.TextColumn(width="small"),
+            "Salida": st.column_config.TextColumn(width="small"),
+            "Horas trab.": st.column_config.TextColumn(width="small"),
+            "Horas extra": st.column_config.TextColumn(width="small"),
+            "Obra / trabajo": st.column_config.TextColumn(width="medium"),
+            "Dirección entrada": st.column_config.TextColumn(width="medium"),
+            "Dirección salida": st.column_config.TextColumn(width="medium"),
+        },
+    )
 
     with st.expander("Ver coordenadas originales (latitud / longitud)"):
         filas_coords = [
