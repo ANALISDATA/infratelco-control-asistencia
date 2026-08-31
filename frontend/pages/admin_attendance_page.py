@@ -22,21 +22,18 @@ def render(admin: User) -> None:
         if registro is None:
             filas.append({
                 "Empleado": empleado.full_name, "Entrada": "—", "Estado": "No marcó",
+                "Salida": "—", "Horas trabajadas": "—", "Horas extra": "—",
                 "Obra / trabajo": "—",
-                "Dirección entrada": "—", "Salida": "—", "Dirección salida": "—",
-                "Horas trabajadas": "—", "Horas extra": "—",
             })
         else:
             filas.append({
                 "Empleado": empleado.full_name,
                 "Entrada": formato_hora(registro.check_in_at) if registro.check_in_at else "—",
                 "Estado": "Puntual" if registro.check_in_status == "on_time" else "Tarde",
-                "Obra / trabajo": registro.observation or "—",
-                "Dirección entrada": registro.check_in_address or "—",
                 "Salida": formato_hora(registro.check_out_at) if registro.check_out_at else "Sin salida",
-                "Dirección salida": registro.check_out_address or "—",
                 "Horas trabajadas": formato_horas_minutos(registro.worked_minutes),
                 "Horas extra": formato_horas_minutos(registro.overtime_minutes) if registro.overtime_minutes else "—",
+                "Obra / trabajo": registro.observation or "—",
             })
 
     if not filas:
@@ -52,6 +49,18 @@ def render(admin: User) -> None:
     col4.metric("Sin salida", (df["Salida"] == "Sin salida").sum())
 
     st.dataframe(df, width="stretch", hide_index=True)
+
+    with st.expander("Ver direcciones de entrada y salida"):
+        filas_direcciones = [
+            {
+                "Empleado": empleado.full_name,
+                "Dirección entrada": (registro.check_in_address or "—") if registro else "—",
+                "Dirección salida": (registro.check_out_address or "—") if registro else "—",
+            }
+            for empleado in empleados
+            for registro in [registros_por_empleado.get(empleado.id)]
+        ]
+        st.dataframe(pd.DataFrame(filas_direcciones), width="stretch", hide_index=True)
 
     with st.expander("Ver coordenadas originales (latitud / longitud)"):
         filas_coords = [
