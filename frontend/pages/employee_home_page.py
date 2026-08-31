@@ -4,7 +4,7 @@ from streamlit_js_eval import get_geolocation
 from backend.models import Employee, User
 from backend.repositories import attendance_repository, employee_repository
 from backend.services.attendance import attendance_service
-from backend.utils.timezone import ahora, formato_fecha, formato_hora
+from backend.utils.timezone import ahora, formato_fecha, formato_hora, formato_horas_minutos
 from frontend.components import branding
 
 
@@ -89,10 +89,11 @@ def render(usuario: User) -> None:
         _mostrar_confirmacion("Ingreso registrado", registro_hoy.check_in_at, registro_hoy.check_in_address,
                                extra=extra_ingreso)
         st.markdown("---")
-        horas = (registro_hoy.worked_minutes or 0) // 60
-        minutos = (registro_hoy.worked_minutes or 0) % 60
+        extra_salida = f"**Horas trabajadas:** {formato_horas_minutos(registro_hoy.worked_minutes)}"
+        if registro_hoy.overtime_minutes:
+            extra_salida += f"  \n**Horas extra:** {formato_horas_minutos(registro_hoy.overtime_minutes)}"
         _mostrar_confirmacion("Salida registrada", registro_hoy.check_out_at, registro_hoy.check_out_address,
-                               extra=f"**Horas trabajadas:** {horas}h {minutos:02d}m")
+                               extra=extra_salida)
 
     elif registro_hoy:
         _mostrar_confirmacion("Ingreso registrado", registro_hoy.check_in_at, registro_hoy.check_in_address,
@@ -150,6 +151,10 @@ def render(usuario: User) -> None:
                 f"**{r.work_date.strftime('%d/%m/%Y')}** — Ingreso "
                 f"{formato_hora(r.check_in_at) if r.check_in_at else '—'} ({estado}) · Salida {hora_salida}"
             )
+            if r.worked_minutes:
+                linea += f" · {formato_horas_minutos(r.worked_minutes)}"
+                if r.overtime_minutes:
+                    linea += f" ({formato_horas_minutos(r.overtime_minutes)} extra)"
             if r.observation:
                 linea += f"  \n*{r.observation}*"
             st.write(linea)

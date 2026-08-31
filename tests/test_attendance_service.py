@@ -123,6 +123,47 @@ def test_calculo_de_horas_trabajadas(fake_db):
     assert resultado.registro.worked_minutes == 9 * 60 + 3
 
 
+def test_horas_extra_cuando_sale_despues_de_la_hora_esperada(fake_db):
+    # Hora de salida esperada muy temprano en el día: sea cual sea la hora real a la
+    # que corra esta prueba, siempre hay horas extra -- sin depender del reloj de la
+    # máquina.
+    _sembrar_ajustes(fake_db, default_check_in_time="00:00:00", default_check_out_time="00:01:00")
+    empleado = _empleado()
+    attendance_service.registrar_ingreso(empleado, _ubicacion_navegador(), comentario="Obra Norte")
+
+    resultado = attendance_service.registrar_salida(empleado, _ubicacion_navegador())
+    assert resultado.registro.overtime_minutes > 0
+    assert resultado.registro.check_out_expected_at is not None
+
+
+def test_sin_horas_extra_si_sale_dentro_del_horario(fake_db):
+    # Hora de salida esperada muy tarde en el día: sea cual sea la hora real a la que
+    # corra esta prueba, nunca hay horas extra.
+    _sembrar_ajustes(fake_db, default_check_out_time="23:59:00")
+    empleado = _empleado()
+    attendance_service.registrar_ingreso(empleado, _ubicacion_navegador(), comentario="Obra Norte")
+
+    resultado = attendance_service.registrar_salida(empleado, _ubicacion_navegador())
+    assert resultado.registro.overtime_minutes == 0
+
+
+def test_horas_extra_usa_la_hora_de_salida_del_horario_del_empleado(fake_db):
+    _sembrar_ajustes(fake_db, default_check_in_time="00:00:00", default_check_out_time="23:59:00")
+    fake_db.seed("schedules", [{"id": "sch-1", "name": "Turno mañana", "tolerance_minutes": 0, "is_active": True}])
+    hoy_weekday = ahora().isoweekday()
+    fake_db.seed("schedule_days", [{
+        "id": "sd-1", "schedule_id": "sch-1", "weekday": hoy_weekday,
+        "is_working_day": True, "start_time": "00:00:00", "end_time": "00:01:00",
+    }])
+    empleado = _empleado(schedule_id="sch-1")
+    attendance_service.registrar_ingreso(empleado, _ubicacion_navegador(), comentario="Obra Norte")
+
+    # El horario del empleado (salida 00:01) manda sobre el predeterminado de la
+    # empresa (23:59) -> siempre hay horas extra hoy.
+    resultado = attendance_service.registrar_salida(empleado, _ubicacion_navegador())
+    assert resultado.registro.overtime_minutes > 0
+
+
 def test_ubicacion_denegada_bloquea_si_la_empresa_lo_exige(fake_db):
     _sembrar_ajustes(fake_db, on_location_failure="block")
     empleado = _empleado()

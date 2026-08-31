@@ -163,6 +163,7 @@ create table if not exists attendance_records (
 
     check_out_at                timestamptz,
     check_out_status              text check (check_out_status in ('registered','missing')),
+    check_out_expected_at       timestamptz,
 
     check_out_latitude          numeric(10,7),
     check_out_longitude         numeric(10,7),
@@ -171,6 +172,7 @@ create table if not exists attendance_records (
     check_out_address            text,
 
     worked_minutes               integer,
+    overtime_minutes             integer,
 
     original_check_in_at        timestamptz,
     modified_check_in_at        timestamptz,

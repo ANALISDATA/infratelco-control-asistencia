@@ -39,3 +39,10 @@ def formato_fecha(dt: datetime) -> str:
 
 def formato_fecha_hora(dt: datetime) -> str:
     return a_bogota(dt).strftime("%d/%m/%Y %H:%M:%S")
+
+
+def formato_horas_minutos(minutos: int | None) -> str:
+    if minutos is None:
+        return "—"
+    horas, resto = divmod(minutos, 60)
+    return f"{horas}h {resto:02d}m"

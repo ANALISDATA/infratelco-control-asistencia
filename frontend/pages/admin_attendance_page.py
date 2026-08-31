@@ -4,7 +4,7 @@ import streamlit as st
 from backend.models import User
 from backend.repositories import attendance_repository
 from backend.services.employees import employee_service
-from backend.utils.timezone import ahora, formato_hora
+from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
 
 
 def render(admin: User) -> None:
@@ -24,6 +24,7 @@ def render(admin: User) -> None:
                 "Empleado": empleado.full_name, "Entrada": "—", "Estado": "No marcó",
                 "Obra / trabajo": "—",
                 "Dirección entrada": "—", "Salida": "—", "Dirección salida": "—",
+                "Horas trabajadas": "—", "Horas extra": "—",
             })
         else:
             filas.append({
@@ -34,6 +35,8 @@ def render(admin: User) -> None:
                 "Dirección entrada": registro.check_in_address or "—",
                 "Salida": formato_hora(registro.check_out_at) if registro.check_out_at else "Sin salida",
                 "Dirección salida": registro.check_out_address or "—",
+                "Horas trabajadas": formato_horas_minutos(registro.worked_minutes),
+                "Horas extra": formato_horas_minutos(registro.overtime_minutes) if registro.overtime_minutes else "—",
             })
 
     if not filas:

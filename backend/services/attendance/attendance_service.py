@@ -52,6 +52,20 @@ def _hora_y_tolerancia_esperadas(empleado: Employee, fecha) -> tuple[time, int]:
     return hora_esperada, tolerancia
 
 
+def _hora_salida_esperada(empleado: Employee, fecha) -> time:
+    ajustes = company_settings_repository.obtener()
+    hora_esperada = _hora_desde_valor(ajustes.default_check_out_time)
+
+    if empleado.schedule_id:
+        horario = schedule_repository.obtener_por_id(empleado.schedule_id)
+        if horario:
+            dia = next((d for d in (horario.dias or []) if d.weekday == fecha.isoweekday()), None)
+            if dia and dia.is_working_day and dia.end_time:
+                hora_esperada = dia.end_time
+
+    return hora_esperada
+
+
 def _resolver_ubicacion(resultado_navegador: dict | None, precision_minima_m: float,
                          requerida: bool, comportamiento_si_falla: str):
     """Devuelve (Ubicacion | None, advertencia | None). Lanza AttendanceError si la
@@ -156,11 +170,21 @@ def registrar_salida(empleado: Employee, resultado_navegador: dict | None) -> Re
 
     minutos_trabajados = int((momento - registro_existente.check_in_at).total_seconds() // 60)
 
+    # Horas extra: lo que pase de la hora de salida esperada ESE día (horario propio del
+    # empleado si tiene uno asignado, si no el predeterminado de la empresa) -- se calcula
+    # y se guarda aquí, no se recalcula después, para que quede fijo con la configuración
+    # vigente ese día (mismo criterio que ya se usa para check_in_status).
+    hora_salida_esperada = _hora_salida_esperada(empleado, hoy)
+    esperado_salida_dt = datetime.combine(hoy, hora_salida_esperada, tzinfo=BOGOTA)
+    minutos_extra = max(0, int((momento - esperado_salida_dt).total_seconds() // 60))
+
     cambios = {
         "check_out_at": momento.isoformat(),
         "check_out_status": "registered",
+        "check_out_expected_at": esperado_salida_dt.isoformat(),
         "original_check_out_at": momento.isoformat(),
         "worked_minutes": minutos_trabajados,
+        "overtime_minutes": minutos_extra,
     }
     if ubicacion:
         cambios.update(

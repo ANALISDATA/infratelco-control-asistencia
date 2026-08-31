@@ -14,6 +14,7 @@ _ACCIONES = {
     "employee.update": "Empleado editado",
     "employee.deactivate": "Empleado desactivado",
     "employee.activate": "Empleado reactivado",
+    "employee.bulk_schedule_assign": "Horario asignado a todos los empleados",
     "company_settings.update": "Configuración de la empresa actualizada",
     "attendance.check_in": "Registró ingreso",
     "attendance.check_out": "Registró salida",

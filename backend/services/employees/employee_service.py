@@ -77,3 +77,15 @@ def activar_empleado(admin: User, employee_id: str) -> None:
 
 def listar_empleados(solo_activos: bool = False, pagina: int = 1, por_pagina: int = 50):
     return employee_repository.listar(solo_activos=solo_activos, pagina=pagina, por_pagina=por_pagina)
+
+
+def asignar_horario_a_todos(admin: User, schedule_id: str | None) -> int:
+    """Para cuando el horario es igual para todo el mundo -- evita tener que entrar a
+    editar empleado por empleado. Quien tenga un horario individual distinto se lo
+    pisa; si se necesita una excepción puntual, se reasigna después desde Empleados."""
+    total = employee_repository.asignar_horario_a_todos(schedule_id)
+    audit_service.registrar(
+        admin, "employee.bulk_schedule_assign", "employee", None,
+        new_value={"schedule_id": schedule_id, "empleados_afectados": total},
+    )
+    return total

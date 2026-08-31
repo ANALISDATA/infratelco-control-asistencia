@@ -3,6 +3,7 @@ from datetime import time as dtime
 import streamlit as st
 
 from backend.models import User
+from backend.services.employees import employee_service
 from backend.services.schedules import schedule_service
 
 DIAS = [(1, "Lunes"), (2, "Martes"), (3, "Miércoles"), (4, "Jueves"), (5, "Viernes"), (6, "Sábado"), (7, "Domingo")]
@@ -80,7 +81,18 @@ def render(admin: User) -> None:
         st.success("Horario actualizado.")
         st.rerun()
 
-    if st.button("Desactivar este horario", key=f"desactivar_{horario.id}"):
-        schedule_service.desactivar_horario(admin, horario.id)
-        st.success("Horario desactivado.")
-        st.rerun()
+    col_todos, col_desactivar = st.columns(2)
+    with col_todos:
+        st.caption(
+            "Por defecto cada empleado puede tener su propio horario (o ninguno, y "
+            "usar el predeterminado de Configuración). Si el horario es igual para "
+            "todos, este botón se lo asigna a todos los empleados activos de una vez."
+        )
+        if st.button("Aplicar este horario a todos los empleados activos", key=f"aplicar_todos_{horario.id}"):
+            total = employee_service.asignar_horario_a_todos(admin, horario.id)
+            st.success(f"Horario «{horario.name}» asignado a {total} empleado(s) activo(s).")
+    with col_desactivar:
+        if st.button("Desactivar este horario", key=f"desactivar_{horario.id}"):
+            schedule_service.desactivar_horario(admin, horario.id)
+            st.success("Horario desactivado.")
+            st.rerun()

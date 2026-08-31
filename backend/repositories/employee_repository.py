@@ -91,3 +91,16 @@ def desactivar(employee_id: str) -> None:
 
 def activar(employee_id: str) -> None:
     db.cliente().table("employees").update({"is_active": True}).eq("id", employee_id).execute()
+
+
+def asignar_horario_a_todos(schedule_id: str | None) -> int:
+    """Asigna `schedule_id` a todos los empleados activos de una sola vez (para no
+    tener que editarlos uno por uno). `schedule_id=None` los deja en el predeterminado
+    de la empresa. Devuelve cuántos empleados se actualizaron."""
+    respuesta = (
+        db.cliente().table("employees")
+        .update({"schedule_id": schedule_id})
+        .eq("is_active", True)
+        .execute()
+    )
+    return len(respuesta.data)

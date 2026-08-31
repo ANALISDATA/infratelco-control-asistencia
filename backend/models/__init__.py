@@ -194,6 +194,7 @@ class AttendanceRecord:
 
     check_out_at: datetime | None = None
     check_out_status: str | None = None  # 'registered' | 'missing'
+    check_out_expected_at: datetime | None = None
     check_out_latitude: float | None = None
     check_out_longitude: float | None = None
     check_out_accuracy_m: float | None = None
@@ -201,6 +202,7 @@ class AttendanceRecord:
     check_out_address: str | None = None
 
     worked_minutes: int | None = None
+    overtime_minutes: int | None = None
 
     observation: str | None = None
     justification_id: str | None = None
@@ -223,12 +225,14 @@ class AttendanceRecord:
             check_in_address=row.get("check_in_address"),
             check_out_at=_parse_dt(row.get("check_out_at")),
             check_out_status=row.get("check_out_status"),
+            check_out_expected_at=_parse_dt(row.get("check_out_expected_at")),
             check_out_latitude=row.get("check_out_latitude"),
             check_out_longitude=row.get("check_out_longitude"),
             check_out_accuracy_m=row.get("check_out_accuracy_m"),
             check_out_location_at=_parse_dt(row.get("check_out_location_at")),
             check_out_address=row.get("check_out_address"),
             worked_minutes=row.get("worked_minutes"),
+            overtime_minutes=row.get("overtime_minutes"),
             observation=row.get("observation"),
             justification_id=row.get("justification_id"),
             modified_by=row.get("modified_by"),
