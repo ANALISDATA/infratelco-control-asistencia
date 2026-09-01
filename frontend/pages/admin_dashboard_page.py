@@ -17,6 +17,9 @@ def render(admin: User) -> None:
     activos = employee_service.listar_empleados(solo_activos=True, por_pagina=1000)
     todos = employee_service.listar_empleados(solo_activos=False, por_pagina=1000)
     inactivos = len(todos) - len(activos)
+    # Operativos = activos sin quienes tienen acceso de Administrador (ej. gerencia):
+    # a ellos no se les espera que marquen, así que no cuentan como "No han marcado".
+    activos_operativos = employee_service.listar_empleados_operativos(solo_activos=True, por_pagina=1000)
 
     hoy = ahora().date()
     registros_hoy = attendance_repository.listar_por_fecha(hoy)
@@ -24,7 +27,7 @@ def render(admin: User) -> None:
 
     puntuales = sum(1 for r in registros_hoy if r.check_in_status == "on_time")
     tarde = sum(1 for r in registros_hoy if r.check_in_status == "late")
-    no_marcaron = sum(1 for e in activos if e.id not in ids_con_registro)
+    no_marcaron = sum(1 for e in activos_operativos if e.id not in ids_con_registro)
     sin_salida = sum(1 for r in registros_hoy if r.check_in_at and not r.check_out_at)
 
     st.markdown("##### Asistencia de hoy")

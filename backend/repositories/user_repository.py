@@ -35,6 +35,20 @@ def obtener_por_id(user_id: str) -> User | None:
     return _con_rol(respuesta.data[0]) if respuesta.data else None
 
 
+def listar_employee_ids_administradores() -> set[str]:
+    """IDs de empleados cuyo usuario de acceso es Administrador (ej. gerencia con ficha
+    de empleado, pero que nunca marca asistencia) -- para excluirlos de las pantallas
+    de seguimiento de asistencia, que solo tiene sentido para el rol Empleado."""
+    respuesta = (
+        db.cliente().table("users")
+        .select("employee_id")
+        .eq("role_id", _ROLE_ID_BY_CODE[Role.ADMIN])
+        .not_.is_("employee_id", "null")
+        .execute()
+    )
+    return {fila["employee_id"] for fila in respuesta.data}
+
+
 def crear(
     *,
     email: str,

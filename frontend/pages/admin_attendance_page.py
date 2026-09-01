@@ -36,7 +36,9 @@ def render(admin: User) -> None:
     registros = attendance_repository.listar_por_fecha(fecha)
     registros_por_empleado = {r.employee_id: r for r in registros}
 
-    empleados_activos = employee_service.listar_empleados(solo_activos=True, por_pagina=1000)
+    # operativos = sin quienes tienen acceso de Administrador (ej. gerencia): a ellos
+    # no se les espera que marquen, así que no deben salir como "No marcó".
+    empleados_activos = employee_service.listar_empleados_operativos(solo_activos=True, por_pagina=1000)
     # Para resolver nombres se usan TODOS los empleados (no solo activos): un registro
     # real de alguien que se desactivó después (ej. renunció el mismo día que trabajó)
     # no debe desaparecer ni reventar la pantalla por no encontrar su nombre.

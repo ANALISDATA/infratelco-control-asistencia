@@ -83,6 +83,16 @@ def listar_empleados(solo_activos: bool = False, pagina: int = 1, por_pagina: in
     return employee_repository.listar(solo_activos=solo_activos, pagina=pagina, por_pagina=por_pagina)
 
 
+def listar_empleados_operativos(solo_activos: bool = False, pagina: int = 1, por_pagina: int = 50):
+    """Como listar_empleados, pero sin quienes tienen acceso de Administrador (ej.
+    gerencia) -- para las pantallas de seguimiento de asistencia, donde no tiene
+    sentido que salgan como "No marcó": un administrador no está obligado a marcar,
+    ve el panel completo en vez de la pantalla de ingreso/salida."""
+    empleados = employee_repository.listar(solo_activos=solo_activos, pagina=pagina, por_pagina=por_pagina)
+    ids_admin = user_repository.listar_employee_ids_administradores()
+    return [e for e in empleados if e.id not in ids_admin]
+
+
 def asignar_horario_a_todos(admin: User, schedule_id: str | None) -> int:
     """Para cuando el horario es igual para todo el mundo -- evita tener que entrar a
     editar empleado por empleado. Quien tenga un horario individual distinto se lo
