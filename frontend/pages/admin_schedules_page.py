@@ -87,18 +87,45 @@ def render(admin: User) -> None:
         st.success("Horario actualizado.")
         st.rerun()
 
-    col_todos, col_desactivar = st.columns(2)
-    with col_todos:
-        st.caption(
-            "Por defecto cada empleado puede tener su propio horario (o ninguno, y "
-            "usar el predeterminado de Configuración). Si el horario es igual para "
-            "todos, este botón se lo asigna a todos los empleados activos de una vez."
-        )
-        if st.button("Aplicar este horario a todos los empleados activos", key=f"aplicar_todos_{horario.id}"):
+    st.markdown("#### Asignar este horario")
+    st.caption(
+        "Por defecto cada empleado puede tener su propio horario (o ninguno, y usar "
+        "el predeterminado de Configuración). Elige si este horario es igual para "
+        "todo el personal, o distinto solo para una persona en particular."
+    )
+    modo = st.radio(
+        "¿A quién se lo asignas?",
+        ["A todos los empleados activos", "A una persona en particular"],
+        key=f"modo_asignacion_{horario.id}", horizontal=True, label_visibility="collapsed",
+    )
+
+    if modo == "A todos los empleados activos":
+        if st.button("Aplicar a todos los empleados activos", key=f"aplicar_todos_{horario.id}"):
             total = employee_service.asignar_horario_a_todos(admin, horario.id)
             st.success(f"Horario «{horario.name}» asignado a {total} empleado(s) activo(s).")
-    with col_desactivar:
-        if st.button("Desactivar este horario", key=f"desactivar_{horario.id}"):
-            schedule_service.desactivar_horario(admin, horario.id)
-            st.success("Horario desactivado.")
-            st.rerun()
+    else:
+        # operativos: quienes de verdad marcan asistencia -- un administrador con
+        # ficha de empleado (ej. gerencia) no tiene horario que cumplir.
+        empleados_operativos = employee_service.listar_empleados_operativos(solo_activos=True, por_pagina=1000)
+        if not empleados_operativos:
+            st.info("No hay empleados activos para asignarles un horario individual.")
+        else:
+            opciones_empleado = {e.full_name: e.id for e in empleados_operativos}
+            col_select, col_boton = st.columns([2, 1])
+            with col_select:
+                empleado_elegido = st.selectbox(
+                    "Empleado", list(opciones_empleado.keys()), key=f"empleado_para_horario_{horario.id}",
+                    label_visibility="collapsed",
+                )
+            with col_boton:
+                if st.button("Asignar a esta persona", key=f"aplicar_uno_{horario.id}", width="stretch"):
+                    employee_service.actualizar_empleado(
+                        admin, opciones_empleado[empleado_elegido], {"schedule_id": horario.id}
+                    )
+                    st.success(f"Horario «{horario.name}» asignado a {empleado_elegido}.")
+
+    st.divider()
+    if st.button("Desactivar este horario", key=f"desactivar_{horario.id}"):
+        schedule_service.desactivar_horario(admin, horario.id)
+        st.success("Horario desactivado.")
+        st.rerun()
