@@ -5,6 +5,7 @@ import streamlit as st
 
 from backend.models import User
 from backend.repositories import attendance_repository
+from backend.services.attendance import attendance_service
 from backend.services.employees import employee_service
 from backend.services.reports import excel_service
 from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
@@ -46,6 +47,26 @@ def render(admin: User) -> None:
     if not registros:
         st.info("No hay registros de asistencia en ese rango de fechas.")
         return
+
+    # Registros con coordenadas GPS (siempre se guardan bien, vienen del celular) pero
+    # sin dirección de texto -- pasa cuando el servicio gratuito de direcciones no
+    # respondió a tiempo justo en ese momento (ver nominatim_provider). No se pierde
+    # nada: siempre se puede reintentar.
+    faltantes = [
+        r for r in registros
+        if (r.check_in_latitude is not None and not r.check_in_address)
+        or (r.check_out_latitude is not None and not r.check_out_address)
+    ]
+    if faltantes:
+        col_aviso, col_boton = st.columns([3, 1])
+        with col_aviso:
+            st.warning(f"{len(faltantes)} registro(s) en este rango tienen ubicación pero sin dirección de texto.")
+        with col_boton:
+            if st.button("🔄 Completar direcciones"):
+                with st.spinner("Consultando direcciones faltantes..."):
+                    completados = attendance_service.completar_direcciones_faltantes(faltantes)
+                st.success(f"Se completaron {completados} de {len(faltantes)} direcciones.")
+                st.rerun()
 
     # solo_activos=False: un reporte de un rango pasado debe incluir a alguien que ya
     # se desactivó en el medio (ej. renunció a mitad de la quincena) -- sus registros

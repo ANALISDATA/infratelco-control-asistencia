@@ -18,7 +18,7 @@ from datetime import datetime, time, timedelta
 from backend.models import AttendanceRecord, Employee
 from backend.repositories import attendance_repository, company_settings_repository, schedule_repository
 from backend.services.audit import audit_service
-from backend.services.geolocation import location_service
+from backend.services.geolocation import location_service, reverse_geocoding_service
 from backend.utils.timezone import BOGOTA, ahora
 
 
@@ -211,3 +211,26 @@ def registrar_salida(empleado: Employee, resultado_navegador: dict | None) -> Re
 
     advertencias = [advertencia] if advertencia else []
     return ResultadoRegistro(registro=registro, advertencias=advertencias)
+
+
+def completar_direcciones_faltantes(registros: list[AttendanceRecord]) -> int:
+    """Red de seguridad para cuando Nominatim falló incluso con reintentos (ver
+    nominatim_provider) y quedó un registro con coordenadas pero sin dirección de
+    texto -- las coordenadas SIEMPRE se guardan bien (vienen del GPS, no de este
+    servicio), así que siempre se puede reintentar más tarde sin perder nada.
+    Devuelve cuántos registros quedaron completos."""
+    completados = 0
+    for r in registros:
+        cambios = {}
+        if r.check_in_latitude is not None and not r.check_in_address:
+            direccion = reverse_geocoding_service.obtener_direccion(r.check_in_latitude, r.check_in_longitude)
+            if direccion:
+                cambios["check_in_address"] = direccion
+        if r.check_out_latitude is not None and not r.check_out_address:
+            direccion = reverse_geocoding_service.obtener_direccion(r.check_out_latitude, r.check_out_longitude)
+            if direccion:
+                cambios["check_out_address"] = direccion
+        if cambios:
+            attendance_repository.actualizar(r.id, cambios)
+            completados += 1
+    return completados
