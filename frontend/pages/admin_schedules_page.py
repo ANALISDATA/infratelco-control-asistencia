@@ -18,14 +18,20 @@ def _formulario_dias(prefijo: str, dias_existentes: dict) -> list[dict]:
             laboral = st.checkbox(nombre, value=(existente.is_working_day if existente else weekday <= 5),
                                    key=f"{prefijo}_lab_{weekday}")
         with col2:
+            # Sin disabled=not laboral a propósito: estos campos viven dentro de un
+            # st.form, y los widgets de un form no vuelven a correr el script hasta que
+            # se envía -- el checkbox de al lado quedaba marcado pero la hora se veía
+            # "congelada" en gris hasta guardar (bug real reportado). El día sí queda
+            # bien guardado: start_time/end_time se ponen en None si laboral es falso,
+            # sin importar qué muestre el campo en pantalla.
             entrada = st.time_input(
                 "Entrada", value=(existente.start_time if existente and existente.start_time else dtime(8, 0)),
-                key=f"{prefijo}_in_{weekday}", disabled=not laboral, label_visibility="collapsed",
+                key=f"{prefijo}_in_{weekday}", label_visibility="collapsed",
             )
         with col3:
             salida = st.time_input(
                 "Salida", value=(existente.end_time if existente and existente.end_time else dtime(17, 0)),
-                key=f"{prefijo}_out_{weekday}", disabled=not laboral, label_visibility="collapsed",
+                key=f"{prefijo}_out_{weekday}", label_visibility="collapsed",
             )
         dias.append({
             "weekday": weekday, "is_working_day": laboral,
