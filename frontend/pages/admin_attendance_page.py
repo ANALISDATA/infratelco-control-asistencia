@@ -72,7 +72,7 @@ def render(admin: User) -> None:
         },
     )
 
-    excel_bytes = excel_service.generar_reporte_asistencia(fecha, filas)
+    excel_bytes = excel_service.generar_reporte_asistencia(f"Fecha: {fecha_str}", filas)
     st.download_button(
         "📥 Descargar Excel",
         data=excel_bytes,

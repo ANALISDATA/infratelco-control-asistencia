@@ -18,10 +18,14 @@ def _generar_password_temporal() -> str:
     return "".join(secrets.choice(alfabeto) for _ in range(12))
 
 
-def crear_empleado(admin: User, datos: Employee) -> tuple[Employee, str]:
+def crear_empleado(admin: User, datos: Employee, rol: str = Role.EMPLOYEE) -> tuple[Employee, str]:
     """Crea el empleado y su usuario de acceso. Devuelve (empleado, password_temporal)
     para que el administrador se la entregue al empleado por un canal seguro (no se envía
-    por ningún canal automático porque no hay proveedor de email/WhatsApp conectado)."""
+    por ningún canal automático porque no hay proveedor de email/WhatsApp conectado).
+
+    `rol`: Role.EMPLOYEE (por defecto, solo puede marcar su propia asistencia) o
+    Role.ADMIN (acceso completo al panel administrativo -- ej. para darle acceso a una
+    secretaria/asistente sin que el dueño tenga que compartir su propia clave)."""
     empleado = employee_repository.crear(datos)
 
     password_temporal = _generar_password_temporal()
@@ -31,7 +35,7 @@ def crear_empleado(admin: User, datos: Employee) -> tuple[Employee, str]:
     user_repository.crear(
         email=datos.email,
         password_hash=security.hash_password(password_temporal),
-        role_code=Role.EMPLOYEE,
+        role_code=rol,
         employee_id=empleado.id,
         login_document_id=empleado.document_id,
         must_change_password=True,

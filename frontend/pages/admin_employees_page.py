@@ -5,7 +5,7 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-from backend.models import Employee, User
+from backend.models import Employee, Role, User
 from backend.repositories import employee_repository, user_repository
 from backend.services.auth import auth_service
 from backend.services.employees import employee_service
@@ -38,6 +38,13 @@ def _formulario_crear(admin: User) -> None:
                 area = st.text_input("Área / departamento")
                 fecha_ingreso = st.date_input("Fecha de ingreso", value=date.today())
             horario_nombre = st.selectbox("Horario", list(opciones_horario.keys()))
+            rol_nombre = st.selectbox(
+                "Rol de acceso", ["Empleado", "Administrador"],
+                help="Administrador ve todo el panel (Dashboard, Empleados, Configuración, "
+                     "Auditoría...) en vez de solo la pantalla de marcar asistencia -- útil "
+                     "para darle acceso a alguien de confianza (ej. una secretaria) sin "
+                     "compartir tu propia clave.",
+            )
 
             enviar = st.form_submit_button("Crear empleado", width="stretch")
 
@@ -60,6 +67,7 @@ def _formulario_crear(admin: User) -> None:
                         hire_date=fecha_ingreso,
                         schedule_id=opciones_horario[horario_nombre],
                     ),
+                    rol=Role.ADMIN if rol_nombre == "Administrador" else Role.EMPLOYEE,
                 )
             except (employee_repository.DocumentoDuplicado, employee_repository.CorreoDuplicado) as e:
                 st.error(str(e))

@@ -4,7 +4,6 @@
 """
 from __future__ import annotations
 
-from datetime import date
 from io import BytesIO
 
 from openpyxl import Workbook
@@ -28,10 +27,11 @@ _FILA_ENCABEZADOS = 4
 _FILA_DATOS_INICIO = 5
 
 
-def generar_reporte_asistencia(fecha: date, filas: list[dict]) -> bytes:
-    """`filas`: lista de dicts con las mismas claves (mismo orden = columnas del
-    Excel), tal como ya se arman para la tabla en pantalla. Devuelve los bytes del
-    .xlsx, listos para `st.download_button`."""
+def generar_reporte_asistencia(subtitulo: str, filas: list[dict]) -> bytes:
+    """`subtitulo`: texto libre bajo el título (ej. "Fecha: 30/08/2026" o "Del
+    16/08/2026 al 30/08/2026"). `filas`: lista de dicts con las mismas claves (mismo
+    orden = columnas del Excel), tal como ya se arman para la tabla en pantalla.
+    Devuelve los bytes del .xlsx, listos para `st.download_button`."""
     wb = Workbook()
     ws = wb.active
     ws.title = "Registros"
@@ -59,7 +59,7 @@ def generar_reporte_asistencia(fecha: date, filas: list[dict]) -> bytes:
 
     ws.merge_cells(f"{col_inicio_letra}{_FILA_SUBTITULO}:{ultima_col_letra}{_FILA_SUBTITULO}")
     celda_subtitulo = ws[f"{col_inicio_letra}{_FILA_SUBTITULO}"]
-    celda_subtitulo.value = f"Fecha: {fecha.strftime('%d/%m/%Y')}"
+    celda_subtitulo.value = subtitulo
     celda_subtitulo.font = Font(size=11, color=_GRIS_TEXTO)
     celda_subtitulo.alignment = Alignment(vertical="center")
 

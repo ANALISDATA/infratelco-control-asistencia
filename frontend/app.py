@@ -28,6 +28,7 @@ from frontend.components.session_state import (  # noqa: E402
     usuario_actual,
 )
 from frontend.pages import (  # noqa: E402
+    admin_attendance_history_page,
     admin_attendance_page,
     admin_audit_page,
     admin_dashboard_page,
@@ -75,6 +76,8 @@ if usuario.role_code == Role.ADMIN:
                 url_path="dashboard", default=True),
         st.Page(lambda: admin_attendance_page.render(usuario), title="Asistencia del día", icon="🕒",
                 url_path="asistencia"),
+        st.Page(lambda: admin_attendance_history_page.render(usuario), title="Histórico", icon="🗂️",
+                url_path="historico"),
         st.Page(lambda: admin_employees_page.render(usuario), title="Empleados", icon="👥",
                 url_path="empleados"),
         st.Page(lambda: admin_schedules_page.render(usuario), title="Horarios", icon="🗓️",
