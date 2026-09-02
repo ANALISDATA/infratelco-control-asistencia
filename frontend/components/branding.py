@@ -339,21 +339,38 @@ def tarjeta_metrica(titulo: str, valor, icono: str, color: str = "azul", ayuda: 
     # de Markdown, y HTML de varias líneas con sangría puede confundirlo (bloque de
     # código por la sangría, o corte de párrafo en una línea en blanco) -- pasó de
     # verdad, se veían las etiquetas </div> como texto literal en vez de cerrar nada.
+    # title="{titulo}" en el rótulo: en columnas muy angostas (5 tarjetas en una
+    # pantalla partida a la mitad, por ejemplo) se deja pasar a 2 líneas como máximo
+    # (-webkit-line-clamp) y de ahí para abajo se corta con "..." -- nunca a media
+    # palabra ("INGRESO"/"S" partido, bug real visto sin esto) y nunca desaparece del
+    # todo (bug real visto con una sola línea + elipsis: en algo como 900px de ancho
+    # de ventana el texto quedaba invisible). El número sí se queda en una sola línea:
+    # nunca es tan largo como para necesitar más. min-width:0 es lo que deja que
+    # "overflow" funcione dentro de un flex -- sin eso, el texto empuja la tarjeta en
+    # vez de recortarse.
+    # El icono puede encogerse (flex-shrink:1, hasta 26px) en vez de quedarse fijo en
+    # 40px -- probado con Playwright a 900px de ancho de ventana (5 tarjetas repartidas
+    # en poco espacio): con el icono fijo, él solo se comía todo el ancho disponible y
+    # el texto quedaba en un contenedor de 0px, invisible del todo aunque el HTML
+    # tuviera el texto adentro. Dejándolo encoger, y con un mínimo de 34px en la
+    # columna de texto, siempre queda algo legible.
     html = (
-        f'<div style="background:{t["bg_tarjeta"]};border-radius:14px;padding:1.1rem 1.2rem;'
+        f'<div style="background:{t["bg_tarjeta"]};border-radius:14px;padding:0.85rem 0.95rem;'
         f'box-shadow:0 6px 18px -8px {t["sombra"]}, 0 0 0 1px {t["borde_tarjeta"]};'
-        f'display:flex;align-items:center;gap:0.9rem;min-height:96px;">'
-        f'<div style="width:46px;height:46px;min-width:46px;border-radius:12px;'
+        f'display:flex;align-items:center;gap:0.6rem;min-height:88px;">'
+        f'<div style="width:40px;height:40px;min-width:26px;flex-shrink:1;border-radius:11px;'
         f'background:rgba({r},{g},{b},{alfa_fondo});display:flex;align-items:center;'
-        f'justify-content:center;flex-shrink:0;">'
-        f'<span style="font-family:\'Material Symbols Rounded\';font-size:23px;'
+        f'justify-content:center;">'
+        f'<span style="font-family:\'Material Symbols Rounded\';font-size:21px;'
         f'color:rgb({r},{g},{b});line-height:1;">{icono}</span>'
         f'</div>'
-        f'<div style="display:flex;flex-direction:column;min-width:0;">'
-        f'<div style="font-size:0.72rem;font-weight:700;letter-spacing:0.03em;'
-        f'text-transform:uppercase;color:{t["texto_secundario"]};line-height:1.3;">{titulo}</div>'
-        f'<div style="font-size:1.65rem;font-weight:800;color:{t["texto_principal"]};'
-        f'line-height:1.25;">{valor}</div>'
+        f'<div style="display:flex;flex-direction:column;min-width:34px;flex:1;">'
+        f'<div title="{titulo}" style="font-size:0.72rem;font-weight:700;letter-spacing:0.03em;'
+        f'text-transform:uppercase;color:{t["texto_secundario"]};line-height:1.3;'
+        f'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;'
+        f'overflow:hidden;overflow-wrap:break-word;">{titulo}</div>'
+        f'<div style="font-size:1.5rem;font-weight:800;color:{t["texto_principal"]};'
+        f'line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{valor}</div>'
         f'{ayuda_html}'
         f'</div>'
         f'</div>'

@@ -32,13 +32,13 @@ def render(admin: User) -> None:
     st.markdown("##### Asistencia de hoy")
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        branding.tarjeta_metrica("Ingresos registrados", len(registros_hoy), "login", "azul")
+        branding.tarjeta_metrica("Ingresos", len(registros_hoy), "login", "azul")
     with col2:
         branding.tarjeta_metrica("Puntuales", puntuales, "check_circle", "verde")
     with col3:
-        branding.tarjeta_metrica("Llegaron tarde", tarde, "schedule", "dorado")
+        branding.tarjeta_metrica("Tarde", tarde, "schedule", "dorado")
     with col4:
-        branding.tarjeta_metrica("No han marcado", no_marcaron, "person_off", "gris")
+        branding.tarjeta_metrica("No marcó", no_marcaron, "person_off", "gris")
     with col5:
         branding.tarjeta_metrica("Sin salida", sin_salida, "logout", "rojo")
 
@@ -95,9 +95,9 @@ def render(admin: User) -> None:
     st.markdown("##### Personal")
     col1, col2, col3 = st.columns(3)
     with col1:
-        branding.tarjeta_metrica("Empleados activos", len(activos), "group", "verde")
+        branding.tarjeta_metrica("Activos", len(activos), "group", "verde")
     with col2:
-        branding.tarjeta_metrica("Empleados inactivos", inactivos, "group_off", "gris")
+        branding.tarjeta_metrica("Inactivos", inactivos, "group_off", "gris")
     with col3:
         branding.tarjeta_metrica("Total empleados", len(todos), "groups", "azul")
 
