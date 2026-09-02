@@ -1,13 +1,13 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import pandas as pd
 import streamlit as st
 
 from backend.models import User
 from backend.repositories import attendance_repository
-from backend.services.attendance import attendance_service
+from backend.services.attendance import attendance_service, correction_service
 from backend.services.reports import excel_service
-from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
+from backend.utils.timezone import BOGOTA, ahora, formato_hora, formato_horas_minutos
 from frontend.components import branding, cache
 
 _ANCHOS_COLUMNAS = {
@@ -124,3 +124,78 @@ def render(admin: User) -> None:
         file_name=f"infratelco_asistencia_{fecha_inicio.isoformat()}_a_{fecha_fin.isoformat()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
+    st.divider()
+    _seccion_corregir_registro(admin, registros_ordenados, nombre_por_id)
+
+
+def _seccion_corregir_registro(admin: User, registros_ordenados: list, nombre_por_id: dict) -> None:
+    st.subheader("Corregir un registro")
+    st.caption(
+        "Para cuando un empleado marcó mal, olvidó marcar la salida, o necesita una "
+        "justificación (cita médica, permiso, etc.). El dato original nunca se borra "
+        "-- queda en la auditoría -- y toda corrección pide un motivo obligatorio."
+    )
+
+    opciones = {
+        r.id: (
+            f"{r.work_date.strftime('%d/%m/%Y')} — {nombre_por_id.get(r.employee_id, '(empleado eliminado)')} "
+            f"(entrada: {formato_hora(r.check_in_at) if r.check_in_at else '—'}, "
+            f"salida: {formato_hora(r.check_out_at) if r.check_out_at else 'sin salida'})"
+        )
+        for r in registros_ordenados
+    }
+    registro_id = st.selectbox(
+        "Selecciona el registro", options=list(opciones.keys()), format_func=lambda rid: opciones[rid],
+    )
+    registro = next(r for r in registros_ordenados if r.id == registro_id)
+
+    with st.form("form_correccion_asistencia"):
+        col1, col2 = st.columns(2)
+        with col1:
+            corregir_entrada = st.checkbox("Corregir hora de entrada")
+            hora_entrada_nueva = st.time_input(
+                "Nueva hora de entrada",
+                value=registro.check_in_at.time() if registro.check_in_at else None,
+            )
+        with col2:
+            corregir_salida = st.checkbox("Corregir hora de salida")
+            hora_salida_nueva = st.time_input(
+                "Nueva hora de salida",
+                value=registro.check_out_at.time() if registro.check_out_at else None,
+            )
+
+        tipo = st.selectbox(
+            "Tipo de justificación",
+            options=list(correction_service.TIPOS_JUSTIFICACION.keys()),
+            format_func=lambda k: correction_service.TIPOS_JUSTIFICACION[k],
+        )
+        motivo = st.text_area("Motivo (obligatorio)")
+
+        guardar = st.form_submit_button("Guardar corrección", icon=":material/edit_note:")
+
+    if guardar:
+        if corregir_entrada and hora_entrada_nueva is None:
+            st.error("Indica la nueva hora de entrada.")
+            return
+        if corregir_salida and hora_salida_nueva is None:
+            st.error("Indica la nueva hora de salida.")
+            return
+
+        nuevo_check_in = (
+            datetime.combine(registro.work_date, hora_entrada_nueva, tzinfo=BOGOTA) if corregir_entrada else None
+        )
+        nuevo_check_out = (
+            datetime.combine(registro.work_date, hora_salida_nueva, tzinfo=BOGOTA) if corregir_salida else None
+        )
+        try:
+            correction_service.corregir_registro(
+                admin, registro.id,
+                nuevo_check_in=nuevo_check_in, nuevo_check_out=nuevo_check_out,
+                tipo=tipo, motivo=motivo,
+            )
+        except correction_service.CorrectionError as error:
+            st.error(str(error))
+        else:
+            st.success("Registro corregido.")
+            st.rerun()

@@ -93,10 +93,14 @@ probaron **contra la base de datos real** (no solo simulada) — ver
 un celular real (no hay forma de simular eso desde aquí) — es lo primero que deberías
 probar tú en la app ya desplegada.
 
-**Fase 3 (parcial):**
+**Fase 3:**
 - Histórico con filtros y pantalla de **Indicadores**: puntualidad, horas trabajadas,
   ausentismo, tendencia diaria y ranking por empleado, con filtro de período y área —
   reemplaza la necesidad de Power BI para el día a día, todo dentro de la misma app.
+- **Correcciones administrativas y justificaciones**: desde Histórico, el administrador
+  puede corregir una hora de entrada/salida mal marcada (o agregar la que falte) con un
+  motivo obligatorio. El dato original nunca se pierde (queda en auditoría), y las horas
+  trabajadas/extra y la puntualidad se recalculan automáticamente con la corrección.
 
 **Fase 4 (parcial):**
 - Descarga de Excel desde Histórico.
@@ -108,8 +112,6 @@ probar tú en la app ya desplegada.
 
 ## Qué falta
 
-- **Fase 3**: justificaciones y correcciones administrativas (editar un registro mal
-  marcado, dejar una nota).
 - **Fase 4**: conectar Power BI de verdad (la base de datos ya está diseñada para
   eso — ver `powerbi/README.md` — pero el tablero en sí no está armado; ya no es
   indispensable porque los mismos indicadores viven en la app).

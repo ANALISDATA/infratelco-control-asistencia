@@ -6,6 +6,11 @@ from backend.models import AttendanceRecord
 from backend.utils import db
 
 
+def obtener_por_id(attendance_id: str) -> AttendanceRecord | None:
+    respuesta = db.cliente().table("attendance_records").select("*").eq("id", attendance_id).limit(1).execute()
+    return AttendanceRecord.from_row(respuesta.data[0]) if respuesta.data else None
+
+
 def obtener_por_empleado_y_fecha(employee_id: str, work_date: date) -> AttendanceRecord | None:
     respuesta = (
         db.cliente()
