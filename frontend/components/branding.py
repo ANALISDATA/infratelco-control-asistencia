@@ -335,31 +335,30 @@ def tarjeta_metrica(titulo: str, valor, icono: str, color: str = "azul", ayuda: 
         f'<div style="font-size:0.76rem;color:{t["texto_secundario"]};margin-top:0.1rem;">{ayuda}</div>'
         if ayuda else ""
     )
-    st.markdown(
-        f"""
-        <div style="background:{t['bg_tarjeta']}; border-radius:14px; padding:1rem 1.15rem;
-                     box-shadow:0 6px 18px -8px {t['sombra']}, 0 0 0 1px {t['borde_tarjeta']};
-                     display:flex; flex-direction:column; gap:0.7rem; min-height:112px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
-                <div style="font-size:0.72rem; font-weight:700; letter-spacing:0.03em;
-                             text-transform:uppercase; color:{t['texto_secundario']}; line-height:1.3;">
-                    {titulo}
-                </div>
-                <div style="width:40px; height:40px; min-width:40px; border-radius:11px;
-                             background:rgba({r},{g},{b},{alfa_fondo}); display:flex;
-                             align-items:center; justify-content:center;">
-                    <span style="font-family:'Material Symbols Rounded'; font-size:21px;
-                                  color:rgb({r},{g},{b}); line-height:1;">{icono}</span>
-                </div>
-            </div>
-            <div style="font-size:1.65rem; font-weight:800; color:{t['texto_principal']}; line-height:1;">
-                {valor}
-            </div>
-            {ayuda_html}
-        </div>
-        """,
-        unsafe_allow_html=True,
+    # Todo en una sola línea a propósito: st.markdown pasa esto primero por un parser
+    # de Markdown, y HTML de varias líneas con sangría puede confundirlo (bloque de
+    # código por la sangría, o corte de párrafo en una línea en blanco) -- pasó de
+    # verdad, se veían las etiquetas </div> como texto literal en vez de cerrar nada.
+    html = (
+        f'<div style="background:{t["bg_tarjeta"]};border-radius:14px;padding:1.1rem 1.2rem;'
+        f'box-shadow:0 6px 18px -8px {t["sombra"]}, 0 0 0 1px {t["borde_tarjeta"]};'
+        f'display:flex;align-items:center;gap:0.9rem;min-height:96px;">'
+        f'<div style="width:46px;height:46px;min-width:46px;border-radius:12px;'
+        f'background:rgba({r},{g},{b},{alfa_fondo});display:flex;align-items:center;'
+        f'justify-content:center;flex-shrink:0;">'
+        f'<span style="font-family:\'Material Symbols Rounded\';font-size:23px;'
+        f'color:rgb({r},{g},{b});line-height:1;">{icono}</span>'
+        f'</div>'
+        f'<div style="display:flex;flex-direction:column;min-width:0;">'
+        f'<div style="font-size:0.72rem;font-weight:700;letter-spacing:0.03em;'
+        f'text-transform:uppercase;color:{t["texto_secundario"]};line-height:1.3;">{titulo}</div>'
+        f'<div style="font-size:1.65rem;font-weight:800;color:{t["texto_principal"]};'
+        f'line-height:1.25;">{valor}</div>'
+        f'{ayuda_html}'
+        f'</div>'
+        f'</div>'
     )
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def encabezado(subtitulo: str | None = None) -> None:
