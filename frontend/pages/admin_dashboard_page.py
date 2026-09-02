@@ -43,20 +43,21 @@ def render(admin: User) -> None:
         branding.tarjeta_metrica("Sin salida", sin_salida, "logout", "rojo")
 
     if registros_hoy or activos:
-        st.altair_chart(
-            charts.barras_estado(
-                pd.DataFrame({
-                    "Estado": ["Puntuales", "Tarde", "No marcaron"],
-                    "Empleados": [puntuales, tarde, no_marcaron],
-                }),
-                "Estado", "Empleados",
-                dominio=["Puntuales", "Tarde", "No marcaron"],
-                rango=[charts.VERDE_ESTADO, charts.AMBAR_ESTADO, charts.GRIS_ESTADO],
-                altura=200,
-                oscuro=branding.es_oscuro(),
-            ),
-            width="stretch",
-        )
+        with st.container(key="tarjeta_grafico_hoy"):
+            st.altair_chart(
+                charts.barras_estado(
+                    pd.DataFrame({
+                        "Estado": ["Puntuales", "Tarde", "No marcaron"],
+                        "Empleados": [puntuales, tarde, no_marcaron],
+                    }),
+                    "Estado", "Empleados",
+                    dominio=["Puntuales", "Tarde", "No marcaron"],
+                    rango=[charts.VERDE_ESTADO, charts.AMBAR_ESTADO, charts.GRIS_ESTADO],
+                    altura=200,
+                    oscuro=branding.es_oscuro(),
+                ),
+                width="stretch",
+            )
 
     st.divider()
     st.markdown("##### Tendencia de asistencia (últimos 14 días)")
@@ -89,7 +90,8 @@ def render(admin: User) -> None:
     # gráfico con varias series superpuestas -- eje vacío / "Infinite extent" en la
     # consola, verificado con Playwright. Se incrusta como HTML/vega-embed directo
     # (el mismo mecanismo ya probado y funcionando) para evitar ese puente por completo.
-    components.html(chart_tendencia.to_html(), height=altura_tendencia + 40, scrolling=False)
+    with st.container(key="tarjeta_grafico_tendencia"):
+        components.html(chart_tendencia.to_html(), height=altura_tendencia + 40, scrolling=False)
 
     st.divider()
     st.markdown("##### Personal")
@@ -104,29 +106,37 @@ def render(admin: User) -> None:
     if not todos:
         st.info("Todavía no hay empleados registrados — los gráficos aparecen aquí apenas crees el primero, en la pestaña **Empleados**.")
     else:
+        altura_personal = 260
         col_a, col_b = st.columns([1, 1.4])
         with col_a:
-            st.markdown("###### Estado del personal")
-            df_estado = pd.DataFrame(
-                {"Estado": ["Activos", "Inactivos"], "Empleados": [len(activos), inactivos]}
-            )
-            st.altair_chart(
-                charts.barras_estado(
-                    df_estado, "Estado", "Empleados",
-                    dominio=["Activos", "Inactivos"],
-                    rango=[charts.VERDE_ESTADO, charts.GRIS_ESTADO],
-                    oscuro=branding.es_oscuro(),
-                ),
-                width="stretch",
-            )
+            with st.container(key="tarjeta_grafico_estado"):
+                st.markdown("###### Estado del personal")
+                df_estado = pd.DataFrame(
+                    {"Estado": ["Activos", "Inactivos"], "Empleados": [len(activos), inactivos]}
+                )
+                st.altair_chart(
+                    charts.barras_estado(
+                        df_estado, "Estado", "Empleados",
+                        dominio=["Activos", "Inactivos"],
+                        rango=[charts.VERDE_ESTADO, charts.GRIS_ESTADO],
+                        altura=altura_personal,
+                        oscuro=branding.es_oscuro(),
+                    ),
+                    width="stretch",
+                )
         with col_b:
-            st.markdown("###### Empleados por área")
-            df_area = (
-                pd.DataFrame([{"Área": e.department or "Sin asignar"} for e in todos])
-                .value_counts("Área")
-                .reset_index(name="Empleados")
-            )
-            st.altair_chart(
-                charts.barras_magnitud(df_area, "Área", "Empleados", oscuro=branding.es_oscuro()),
-                width="stretch",
-            )
+            with st.container(key="tarjeta_grafico_area"):
+                st.markdown("###### Empleados por área")
+                df_area = (
+                    pd.DataFrame([{"Área": e.department or "Sin asignar"} for e in todos])
+                    .value_counts("Área")
+                    .reset_index(name="Empleados")
+                )
+                st.altair_chart(
+                    charts.barras_magnitud(
+                        df_area, "Área", "Empleados",
+                        altura=altura_personal,
+                        oscuro=branding.es_oscuro(),
+                    ),
+                    width="stretch",
+                )

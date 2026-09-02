@@ -224,6 +224,20 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {{
     font-weight: 800 !important;
 }}
 
+/* Tarjetas para envolver gráficos (Dashboard) -- mismo lenguaje visual que las
+   tarjetas de métricas, para que los gráficos no queden flotando sueltos sobre el
+   fondo gris. [class*="..."] en vez de una clave exacta porque hay varios gráficos
+   (uno por st.container(key="tarjeta_grafico_N")) y así se estilan todos con una sola
+   regla, sin tener que listar cada key. */
+[class*="st-key-tarjeta_grafico"] {{
+    background: {t['bg_tarjeta']};
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem 0.6rem 1.2rem;
+    box-shadow: 0 6px 18px -8px {t['sombra']}, 0 0 0 1px {t['borde_tarjeta']};
+    margin-top: 0.9rem;
+    margin-bottom: 0.9rem;
+}}
+
 /* Títulos de página (st.header) -- en esta versión de Streamlit renderiza <h2>,
    no <h1> (verificado con Playwright contra el DOM real). Más presencia, con
    acento de marca. */
