@@ -71,26 +71,28 @@ if usuario.role_code == Role.ADMIN:
     # función, y todas estas son lambdas -> todas se llaman "<lambda>" y chocan
     # ("Multiple Pages specified with URL pathname <lambda>"). Bug real encontrado
     # probando el login completo contra la base de datos real.
+    # Iconos de Material Symbols (mismo estilo de línea limpia en todo el panel, en vez
+    # de emojis) -- Streamlit ya trae esa fuente cargada, no hace falta nada aparte.
     paginas = [
-        st.Page(lambda: admin_dashboard_page.render(usuario), title="Dashboard", icon="📊",
-                url_path="dashboard", default=True),
-        st.Page(lambda: admin_attendance_page.render(usuario), title="Asistencia del día", icon="🕒",
-                url_path="asistencia"),
-        st.Page(lambda: admin_attendance_history_page.render(usuario), title="Histórico", icon="🗂️",
-                url_path="historico"),
-        st.Page(lambda: admin_employees_page.render(usuario), title="Empleados", icon="👥",
-                url_path="empleados"),
-        st.Page(lambda: admin_schedules_page.render(usuario), title="Horarios", icon="🗓️",
-                url_path="horarios"),
-        st.Page(lambda: admin_settings_page.render(usuario), title="Configuración", icon="⚙️",
-                url_path="configuracion"),
-        st.Page(lambda: admin_audit_page.render(usuario), title="Auditoría", icon="🛡️",
-                url_path="auditoria"),
+        st.Page(lambda: admin_dashboard_page.render(usuario), title="Dashboard",
+                icon=":material/dashboard:", url_path="dashboard", default=True),
+        st.Page(lambda: admin_attendance_page.render(usuario), title="Asistencia del día",
+                icon=":material/event_available:", url_path="asistencia"),
+        st.Page(lambda: admin_attendance_history_page.render(usuario), title="Histórico",
+                icon=":material/history:", url_path="historico"),
+        st.Page(lambda: admin_employees_page.render(usuario), title="Empleados",
+                icon=":material/group:", url_path="empleados"),
+        st.Page(lambda: admin_schedules_page.render(usuario), title="Horarios",
+                icon=":material/calendar_month:", url_path="horarios"),
+        st.Page(lambda: admin_settings_page.render(usuario), title="Configuración",
+                icon=":material/settings:", url_path="configuracion"),
+        st.Page(lambda: admin_audit_page.render(usuario), title="Auditoría",
+                icon=":material/shield:", url_path="auditoria"),
     ]
 else:
     paginas = [
-        st.Page(lambda: employee_home_page.render(usuario), title="Mi cuenta", icon="👤",
-                url_path="mi-cuenta", default=True),
+        st.Page(lambda: employee_home_page.render(usuario), title="Mi cuenta",
+                icon=":material/person:", url_path="mi-cuenta", default=True),
     ]
 
 with st.sidebar:
@@ -102,7 +104,7 @@ with st.sidebar:
     with col_tema:
         branding.boton_tema()
     with col_salir:
-        if st.button("Cerrar sesión", width="stretch"):
+        if st.button("Cerrar sesión", icon=":material/logout:", width="stretch"):
             cerrar_sesion()
             st.rerun()
 

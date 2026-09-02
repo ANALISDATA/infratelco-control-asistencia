@@ -23,7 +23,7 @@ def _opciones_horario() -> dict[str, str | None]:
 
 
 def _formulario_crear(admin: User) -> None:
-    with st.expander("➕ Crear nuevo empleado", expanded=False):
+    with st.expander("Crear nuevo empleado", icon=":material/add:", expanded=False):
         opciones_horario = _opciones_horario()
         with st.form("form_crear_empleado", clear_on_submit=True):
             col1, col2 = st.columns(2)
@@ -46,7 +46,7 @@ def _formulario_crear(admin: User) -> None:
                      "compartir tu propia clave.",
             )
 
-            enviar = st.form_submit_button("Crear empleado", width="stretch")
+            enviar = st.form_submit_button("Crear empleado", icon=":material/person_add:", width="stretch")
 
         if enviar:
             if not nombre or not cedula or not correo:
@@ -136,7 +136,7 @@ def _tabla_empleados(admin: User) -> None:
             "Horario", list(opciones_horario.keys()),
             index=list(opciones_horario.keys()).index(nombre_horario_actual),
         )
-        guardar = st.form_submit_button("Guardar cambios")
+        guardar = st.form_submit_button("Guardar cambios", icon=":material/save:")
 
     if guardar:
         try:
@@ -162,13 +162,17 @@ def _tabla_empleados(admin: User) -> None:
 
     col_a, col_b, col_c = st.columns(3)
     with col_a:
-        if empleado.is_active and st.button("Desactivar empleado", key=f"desactivar_{empleado.id}"):
+        if empleado.is_active and st.button(
+            "Desactivar empleado", icon=":material/person_remove:", key=f"desactivar_{empleado.id}"
+        ):
             employee_service.desactivar_empleado(admin, empleado.id)
             cache.limpiar_cache_empleados()
             st.success(f"{empleado.full_name} desactivado.")
             st.rerun()
     with col_b:
-        if not empleado.is_active and st.button("Reactivar empleado", key=f"activar_{empleado.id}"):
+        if not empleado.is_active and st.button(
+            "Reactivar empleado", icon=":material/person_check:", key=f"activar_{empleado.id}"
+        ):
             employee_service.activar_empleado(admin, empleado.id)
             cache.limpiar_cache_empleados()
             st.success(f"{empleado.full_name} reactivado.")
@@ -178,7 +182,7 @@ def _tabla_empleados(admin: User) -> None:
         # todavía no está conectado (ver documentation/notifications.md) -- y sin
         # que la contraseña real de nadie se guarde en texto plano ni se muestre
         # nunca (regla de seguridad del proyecto).
-        if st.button("🔑 Restablecer contraseña", key=f"reset_pw_{empleado.id}"):
+        if st.button("Restablecer contraseña", icon=":material/key:", key=f"reset_pw_{empleado.id}"):
             usuario_empleado = user_repository.obtener_por_documento(empleado.document_id)
             if usuario_empleado is None:
                 st.error("Este empleado no tiene un usuario de acceso asociado.")

@@ -70,7 +70,7 @@ def render(admin: User) -> None:
             "Número de WhatsApp del administrador", value=settings.whatsapp_admin_number or ""
         )
 
-        guardar = st.form_submit_button("Guardar configuración", width="stretch")
+        guardar = st.form_submit_button("Guardar configuración", icon=":material/save:", width="stretch")
 
     if guardar:
         company_settings_service.actualizar(

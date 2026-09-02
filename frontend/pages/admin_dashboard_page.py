@@ -31,11 +31,16 @@ def render(admin: User) -> None:
 
     st.markdown("##### Asistencia de hoy")
     col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Ingresos registrados", len(registros_hoy))
-    col2.metric("Puntuales", puntuales)
-    col3.metric("Llegaron tarde", tarde)
-    col4.metric("No han marcado", no_marcaron)
-    col5.metric("Sin salida", sin_salida)
+    with col1:
+        branding.tarjeta_metrica("Ingresos registrados", len(registros_hoy), "login", "azul")
+    with col2:
+        branding.tarjeta_metrica("Puntuales", puntuales, "check_circle", "verde")
+    with col3:
+        branding.tarjeta_metrica("Llegaron tarde", tarde, "schedule", "dorado")
+    with col4:
+        branding.tarjeta_metrica("No han marcado", no_marcaron, "person_off", "gris")
+    with col5:
+        branding.tarjeta_metrica("Sin salida", sin_salida, "logout", "rojo")
 
     if registros_hoy or activos:
         st.altair_chart(
@@ -89,9 +94,12 @@ def render(admin: User) -> None:
     st.divider()
     st.markdown("##### Personal")
     col1, col2, col3 = st.columns(3)
-    col1.metric("Empleados activos", len(activos))
-    col2.metric("Empleados inactivos", inactivos)
-    col3.metric("Total empleados", len(todos))
+    with col1:
+        branding.tarjeta_metrica("Empleados activos", len(activos), "group", "verde")
+    with col2:
+        branding.tarjeta_metrica("Empleados inactivos", inactivos, "group_off", "gris")
+    with col3:
+        branding.tarjeta_metrica("Total empleados", len(todos), "groups", "azul")
 
     if not todos:
         st.info("Todavía no hay empleados registrados — los gráficos aparecen aquí apenas crees el primero, en la pestaña **Empleados**.")

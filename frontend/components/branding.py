@@ -260,13 +260,21 @@ div[data-testid="stHeading"] h2::after {{
     font-size: 0.85rem;
 }}
 
-/* Botón de modo claro/oscuro */
+/* Botón de modo claro/oscuro -- antes usaba un emoji (☀️/🌙), inmune al CSS de color
+   por ser un glifo de emoji; ahora es un icono real de Material Symbols, que sí
+   respeta "color", así que hace falta forzarlo junto con el fondo o queda blanco
+   sobre blanco (bug real, visto con Playwright). */
 .st-key-boton_tema button {{
     border-radius: 999px !important;
     width: 2.6rem;
     height: 2.6rem;
     padding: 0 !important;
     font-size: 1.1rem !important;
+    background-color: rgba(255,255,255,0.10) !important;
+}}
+.st-key-boton_tema button,
+.st-key-boton_tema button * {{
+    color: {BLANCO} !important;
 }}
 
 /* Celular: nunca debe aparecer una barra de scroll horizontal ni contenido cortado,
@@ -287,11 +295,71 @@ def aplicar_estilo() -> None:
 
 
 def boton_tema() -> None:
-    """Botón redondo (☀️/🌙) que alterna el fondo de la app entre claro y oscuro."""
+    """Botón redondo que alterna el fondo de la app entre claro y oscuro."""
     with st.container(key="boton_tema"):
-        if st.button("☀️" if es_oscuro() else "🌙", help="Cambiar a modo claro/oscuro"):
+        icono = ":material/light_mode:" if es_oscuro() else ":material/dark_mode:"
+        if st.button("", icon=icono, help="Cambiar a modo claro/oscuro"):
             alternar_tema()
             st.rerun()
+
+
+# --- Tarjetas con icono (estilo "badge" de color) -------------------------
+# Reemplaza st.metric en las pantallas de asistencia/dashboard: Streamlit no deja
+# ponerle un icono a st.metric, así que estas se arman con HTML propio. El icono usa
+# la misma fuente "Material Symbols Rounded" que Streamlit ya carga para sus propios
+# iconos (:material/nombre:), así que no hace falta cargar nada aparte -- basta con
+# reusar el mismo nombre de icono como texto dentro de un <span> con esa fuente.
+_COLORES_BADGE = {
+    "azul": AZUL,
+    "verde": VERDE,
+    "dorado": "#B8930A",  # el dorado de marca es muy claro para verse como icono/texto
+    "rojo": "#DC2626",
+    "gris": "#6B7280",
+}
+
+
+def _hex_a_rgb(color_hex: str) -> tuple[int, int, int]:
+    color_hex = color_hex.lstrip("#")
+    return tuple(int(color_hex[i : i + 2], 16) for i in (0, 2, 4))
+
+
+def tarjeta_metrica(titulo: str, valor, icono: str, color: str = "azul", ayuda: str | None = None) -> None:
+    """`icono`: nombre de un icono de Material Symbols (ej. "check_circle"), sin los
+    dos puntos ni el prefijo "material/" que sí lleva `icon=":material/x:"` en los
+    widgets nativos de Streamlit. `color`: una clave de _COLORES_BADGE."""
+    oscuro = es_oscuro()
+    t = _tokens(oscuro)
+    r, g, b = _hex_a_rgb(_COLORES_BADGE.get(color, color))
+    alfa_fondo = 0.24 if oscuro else 0.12
+    ayuda_html = (
+        f'<div style="font-size:0.76rem;color:{t["texto_secundario"]};margin-top:0.1rem;">{ayuda}</div>'
+        if ayuda else ""
+    )
+    st.markdown(
+        f"""
+        <div style="background:{t['bg_tarjeta']}; border-radius:14px; padding:1rem 1.15rem;
+                     box-shadow:0 6px 18px -8px {t['sombra']}, 0 0 0 1px {t['borde_tarjeta']};
+                     display:flex; flex-direction:column; gap:0.7rem; min-height:112px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
+                <div style="font-size:0.72rem; font-weight:700; letter-spacing:0.03em;
+                             text-transform:uppercase; color:{t['texto_secundario']}; line-height:1.3;">
+                    {titulo}
+                </div>
+                <div style="width:40px; height:40px; min-width:40px; border-radius:11px;
+                             background:rgba({r},{g},{b},{alfa_fondo}); display:flex;
+                             align-items:center; justify-content:center;">
+                    <span style="font-family:'Material Symbols Rounded'; font-size:21px;
+                                  color:rgb({r},{g},{b}); line-height:1;">{icono}</span>
+                </div>
+            </div>
+            <div style="font-size:1.65rem; font-weight:800; color:{t['texto_principal']}; line-height:1;">
+                {valor}
+            </div>
+            {ayuda_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def encabezado(subtitulo: str | None = None) -> None:

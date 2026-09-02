@@ -141,7 +141,7 @@ def render() -> None:
             with st.form("form_login"):
                 identificador = st.text_input("Cédula o correo electrónico")
                 password = st.text_input("Contraseña", type="password")
-                enviar = st.form_submit_button("Ingresar", width="stretch")
+                enviar = st.form_submit_button("Ingresar", icon=":material/login:", width="stretch")
 
             if enviar:
                 if not identificador or not password:

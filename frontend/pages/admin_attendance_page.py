@@ -5,7 +5,7 @@ from backend.models import User
 from backend.repositories import attendance_repository
 from backend.services.reports import excel_service
 from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
-from frontend.components import cache
+from frontend.components import branding, cache
 
 
 def _fila(fecha_str: str, nombre: str, registro) -> dict:
@@ -67,10 +67,14 @@ def render(admin: User) -> None:
     df = pd.DataFrame(filas)
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Puntuales", (df["Estado"] == "Puntual").sum())
-    col2.metric("Tarde", (df["Estado"] == "Tarde").sum())
-    col3.metric("No marcaron", (df["Estado"] == "No marcó").sum())
-    col4.metric("Sin salida", (df["Salida"] == "Sin salida").sum())
+    with col1:
+        branding.tarjeta_metrica("Puntuales", (df["Estado"] == "Puntual").sum(), "check_circle", "verde")
+    with col2:
+        branding.tarjeta_metrica("Tarde", (df["Estado"] == "Tarde").sum(), "schedule", "dorado")
+    with col3:
+        branding.tarjeta_metrica("No marcaron", (df["Estado"] == "No marcó").sum(), "person_off", "gris")
+    with col4:
+        branding.tarjeta_metrica("Sin salida", (df["Salida"] == "Sin salida").sum(), "logout", "rojo")
 
     # Columnas cortas (hora, estado, horas) angostas a propósito -- para que quepa todo
     # sin tener que deslizar la tabla, incluyendo Empleado en cada fila (con más de 20
@@ -93,7 +97,7 @@ def render(admin: User) -> None:
 
     excel_bytes = excel_service.generar_reporte_asistencia(f"Fecha: {fecha_str}", filas)
     st.download_button(
-        "📥 Descargar Excel",
+        "Descargar Excel", icon=":material/download:",
         data=excel_bytes,
         file_name=f"infratelco_asistencia_{fecha.isoformat()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

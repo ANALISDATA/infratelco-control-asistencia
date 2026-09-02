@@ -45,13 +45,13 @@ def _formulario_dias(prefijo: str, dias_existentes: dict) -> list[dict]:
 def render(admin: User) -> None:
     st.header("Horarios")
 
-    with st.expander("➕ Crear nuevo horario"):
+    with st.expander("Crear nuevo horario", icon=":material/add:"):
         with st.form("form_crear_horario"):
             nombre = st.text_input("Nombre del horario *", placeholder="Ej. Horario Administrativo")
             tolerancia = st.number_input("Tolerancia (minutos)", min_value=0, max_value=120, value=10)
             st.caption("Día · hora de entrada · hora de salida")
             dias = _formulario_dias("nuevo", {})
-            crear = st.form_submit_button("Crear horario", width="stretch")
+            crear = st.form_submit_button("Crear horario", icon=":material/add:", width="stretch")
 
         if crear:
             if not nombre.strip():
@@ -82,7 +82,7 @@ def render(admin: User) -> None:
                                       value=horario.tolerance_minutes)
         st.caption("Día · hora de entrada · hora de salida")
         dias = _formulario_dias("editar", dias_existentes)
-        guardar = st.form_submit_button("Guardar cambios", width="stretch")
+        guardar = st.form_submit_button("Guardar cambios", icon=":material/save:", width="stretch")
 
     if guardar:
         schedule_service.actualizar_horario(admin, horario.id, nombre.strip(), int(tolerancia), dias)
@@ -103,7 +103,9 @@ def render(admin: User) -> None:
     )
 
     if modo == "A todos los empleados activos":
-        if st.button("Aplicar a todos los empleados activos", key=f"aplicar_todos_{horario.id}"):
+        if st.button(
+            "Aplicar a todos los empleados activos", icon=":material/groups:", key=f"aplicar_todos_{horario.id}"
+        ):
             total = employee_service.asignar_horario_a_todos(admin, horario.id)
             cache.limpiar_cache_empleados()
             st.success(f"Horario «{horario.name}» asignado a {total} empleado(s) activo(s).")
@@ -122,7 +124,10 @@ def render(admin: User) -> None:
                     label_visibility="collapsed",
                 )
             with col_boton:
-                if st.button("Asignar a esta persona", key=f"aplicar_uno_{horario.id}", width="stretch"):
+                if st.button(
+                    "Asignar a esta persona", icon=":material/person:",
+                    key=f"aplicar_uno_{horario.id}", width="stretch",
+                ):
                     employee_service.actualizar_empleado(
                         admin, opciones_empleado[empleado_elegido], {"schedule_id": horario.id}
                     )
@@ -130,7 +135,7 @@ def render(admin: User) -> None:
                     st.success(f"Horario «{horario.name}» asignado a {empleado_elegido}.")
 
     st.divider()
-    if st.button("Desactivar este horario", key=f"desactivar_{horario.id}"):
+    if st.button("Desactivar este horario", icon=":material/block:", key=f"desactivar_{horario.id}"):
         schedule_service.desactivar_horario(admin, horario.id)
         cache.limpiar_cache_horarios()
         st.success("Horario desactivado.")

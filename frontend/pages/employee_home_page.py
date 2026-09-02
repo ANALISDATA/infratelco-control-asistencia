@@ -26,7 +26,7 @@ def _bloque_ubicacion(clave: str) -> dict | None:
             "Para registrar tu asistencia, INFRATELCO necesita tu ubicación en este "
             "momento — no se hace seguimiento continuo."
         )
-        if st.button("📍 Permitir ubicación", key=f"btn_{clave}", width="stretch"):
+        if st.button("Permitir ubicación", icon=":material/my_location:", key=f"btn_{clave}", width="stretch"):
             st.session_state[clave_solicitada] = True
             st.rerun()
         return None
@@ -37,7 +37,7 @@ def _bloque_ubicacion(clave: str) -> dict | None:
         return None
     if "error" in resultado:
         st.error(resultado["error"].get("message", "No se pudo obtener tu ubicación."))
-        if st.button("Reintentar", key=f"retry_{clave}"):
+        if st.button("Reintentar", icon=":material/refresh:", key=f"retry_{clave}"):
             st.session_state.pop(clave_solicitada, None)
             st.rerun()
         return None
@@ -101,7 +101,7 @@ def render(usuario: User) -> None:
         st.divider()
         st.markdown("### Registrar salida")
         resultado_gps = _bloque_ubicacion("gps_salida")
-        if st.button("REGISTRAR SALIDA", type="primary", width="stretch"):
+        if st.button("REGISTRAR SALIDA", icon=":material/logout:", type="primary", width="stretch"):
             if resultado_gps is None:
                 st.error("Debes permitir tu ubicación antes de registrar la salida.")
             else:
@@ -123,7 +123,7 @@ def render(usuario: User) -> None:
             placeholder="Ej: Obra Torre Norte — instalación eléctrica",
         )
         resultado_gps = _bloque_ubicacion("gps_ingreso")
-        if st.button("REGISTRAR INGRESO", type="primary", width="stretch"):
+        if st.button("REGISTRAR INGRESO", icon=":material/login:", type="primary", width="stretch"):
             if not comentario or not comentario.strip():
                 st.error("Debes indicar la obra o el trabajo que vas a realizar.")
             elif resultado_gps is None:

@@ -8,7 +8,7 @@ from backend.repositories import attendance_repository
 from backend.services.attendance import attendance_service
 from backend.services.reports import excel_service
 from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
-from frontend.components import cache
+from frontend.components import branding, cache
 
 _ANCHOS_COLUMNAS = {
     "Fecha": "small",
@@ -62,7 +62,7 @@ def render(admin: User) -> None:
         with col_aviso:
             st.warning(f"{len(faltantes)} registro(s) en este rango tienen ubicación pero sin dirección de texto.")
         with col_boton:
-            if st.button("🔄 Completar direcciones"):
+            if st.button("Completar direcciones", icon=":material/refresh:"):
                 with st.spinner("Consultando direcciones faltantes..."):
                     completados = attendance_service.completar_direcciones_faltantes(faltantes)
                 st.success(f"Se completaron {completados} de {len(faltantes)} direcciones.")
@@ -100,10 +100,14 @@ def render(admin: User) -> None:
     df = pd.DataFrame(filas)
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Registros", len(filas))
-    col2.metric("Puntuales", (df["Estado"] == "Puntual").sum())
-    col3.metric("Tarde", (df["Estado"] == "Tarde").sum())
-    col4.metric("Sin salida", (df["Salida"] == "Sin salida").sum())
+    with col1:
+        branding.tarjeta_metrica("Registros", len(filas), "list_alt", "azul")
+    with col2:
+        branding.tarjeta_metrica("Puntuales", (df["Estado"] == "Puntual").sum(), "check_circle", "verde")
+    with col3:
+        branding.tarjeta_metrica("Tarde", (df["Estado"] == "Tarde").sum(), "schedule", "dorado")
+    with col4:
+        branding.tarjeta_metrica("Sin salida", (df["Salida"] == "Sin salida").sum(), "logout", "rojo")
 
     st.dataframe(
         df, width="stretch", hide_index=True,
@@ -115,7 +119,7 @@ def render(admin: User) -> None:
     subtitulo = f"Del {fecha_inicio.strftime('%d/%m/%Y')} al {fecha_fin.strftime('%d/%m/%Y')}"
     excel_bytes = excel_service.generar_reporte_asistencia(subtitulo, filas)
     st.download_button(
-        "📥 Descargar Excel del rango",
+        "Descargar Excel del rango", icon=":material/download:",
         data=excel_bytes,
         file_name=f"infratelco_asistencia_{fecha_inicio.isoformat()}_a_{fecha_fin.isoformat()}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
