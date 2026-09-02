@@ -19,6 +19,7 @@ from backend.models import AttendanceRecord, Employee
 from backend.repositories import attendance_repository, company_settings_repository, schedule_repository
 from backend.services.audit import audit_service
 from backend.services.geolocation import location_service, reverse_geocoding_service
+from backend.services.notifications import whatsapp_service
 from backend.utils.timezone import BOGOTA, ahora
 
 
@@ -144,6 +145,9 @@ def registrar_ingreso(empleado: Employee, resultado_navegador: dict | None,
         None, "attendance.check_in", "attendance_record", registro.id,
         new_value={"employee_id": empleado.id, "check_in_at": momento.isoformat(), "status": estado},
     )
+
+    if estado == "late":
+        whatsapp_service.notificar_llegada_tarde(empleado, registro)
 
     advertencias = [advertencia] if advertencia else []
     return ResultadoRegistro(registro=registro, advertencias=advertencias)

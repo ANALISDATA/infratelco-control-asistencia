@@ -2,8 +2,11 @@ from datetime import time as dtime
 
 import streamlit as st
 
+from backend import config
 from backend.models import User
 from backend.services.company import company_settings_service
+from backend.services.notifications import whatsapp_service
+from backend.services.notifications.providers.callmebot_provider import CallMeBotError
 
 
 def render(admin: User) -> None:
@@ -65,9 +68,11 @@ def render(admin: User) -> None:
                 format_func=lambda v: "Permitir registro con advertencia" if v == "allow_with_warning" else "Bloquear registro",
             )
 
-        st.subheader("WhatsApp (Fase 5 — todavía sin proveedor conectado)")
+        st.subheader("WhatsApp — aviso de llegada tarde")
         whatsapp_admin = st.text_input(
-            "Número de WhatsApp del administrador", value=settings.whatsapp_admin_number or ""
+            "Número de WhatsApp del administrador (a donde llega el aviso)",
+            value=settings.whatsapp_admin_number or "",
+            help="Celular colombiano con o sin indicativo, ej. 3127726924.",
         )
 
         guardar = st.form_submit_button("Guardar configuración", icon=":material/save:", width="stretch")
@@ -94,3 +99,20 @@ def render(admin: User) -> None:
         )
         st.success("Configuración guardada.")
         st.rerun()
+
+    st.divider()
+    conectado = config.WHATSAPP_PROVIDER == "callmebot" and bool(config.WHATSAPP_API_KEY)
+    if conectado:
+        st.success("WhatsApp conectado (CallMeBot) — los avisos de llegada tarde se envían automáticamente.")
+    else:
+        st.warning(
+            "WhatsApp todavía sin conectar: falta la apikey de CallMeBot en `secrets.toml` "
+            "(`whatsapp_api_key`). Mientras tanto, ningún aviso se envía — el registro de "
+            "asistencia sigue funcionando normal."
+        )
+    if st.button("Enviar mensaje de prueba", icon=":material/send:", disabled=not settings.whatsapp_admin_number):
+        try:
+            whatsapp_service.enviar_mensaje_prueba(settings.whatsapp_admin_number)
+            st.success(f"Mensaje de prueba enviado a {settings.whatsapp_admin_number}.")
+        except CallMeBotError as error:
+            st.error(str(error))

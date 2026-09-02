@@ -3,11 +3,10 @@
 Sistema empresarial de control de asistencia, ingreso, salida y geolocalización para
 **INFRATELCO — Ingeniería Eléctrica e Infraestructura**.
 
-> **Estado actual: Fases 1 y 2 completadas** (estructura, base de datos, autenticación,
-> roles, empleados, configuración, auditoría, horarios, y el registro de ingreso/salida
-> con geolocalización y Reverse Geocoding). Desplegada y funcionando en Streamlit
-> Community Cloud. Ver el detalle de qué funciona hoy y qué falta al final de este
-> archivo y en `documentation/`.
+> **Estado actual: Fases 1 y 2 completadas**, más histórico con filtros, indicadores
+> visuales y Excel (Fases 3-4) y el aviso de WhatsApp por llegada tarde (Fase 5).
+> Desplegada y funcionando en Streamlit Community Cloud. Ver el detalle de qué funciona
+> hoy y qué falta al final de este archivo y en `documentation/`.
 
 ## Requisitos
 
@@ -94,11 +93,28 @@ probaron **contra la base de datos real** (no solo simulada) — ver
 un celular real (no hay forma de simular eso desde aquí) — es lo primero que deberías
 probar tú en la app ya desplegada.
 
-## Qué falta (fases siguientes, ver `documentation/technical-decisions.md`)
+**Fase 3 (parcial):**
+- Histórico con filtros y pantalla de **Indicadores**: puntualidad, horas trabajadas,
+  ausentismo, tendencia diaria y ranking por empleado, con filtro de período y área —
+  reemplaza la necesidad de Power BI para el día a día, todo dentro de la misma app.
 
-- **Fase 3**: justificaciones, correcciones administrativas, histórico con filtros.
-- **Fase 4**: Excel corporativo, Power BI.
-- **Fase 5**: WhatsApp, email, resumen diario.
+**Fase 4 (parcial):**
+- Descarga de Excel desde Histórico.
+
+**Fase 5 (parcial):**
+- Aviso de WhatsApp al administrador cuando un empleado llega tarde, vía
+  [CallMeBot](https://www.callmebot.com/blog/free-api-whatsapp-messages/) (gratis, sin
+  cuenta de empresa) — ver `documentation/notifications.md`.
+
+## Qué falta
+
+- **Fase 3**: justificaciones y correcciones administrativas (editar un registro mal
+  marcado, dejar una nota).
+- **Fase 4**: conectar Power BI de verdad (la base de datos ya está diseñada para
+  eso — ver `powerbi/README.md` — pero el tablero en sí no está armado; ya no es
+  indispensable porque los mismos indicadores viven en la app).
+- **Fase 5**: resumen diario y aviso de "no marcó salida" por WhatsApp, y el canal de
+  email (sin proveedor conectado, ver `documentation/technical-decisions.md`).
 
 ## Ejecutar las pruebas
 
