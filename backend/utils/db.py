@@ -24,11 +24,18 @@ ESQUEMA = "infratelco"
 def cliente():
     if not disponible():
         return None
+    import httpx
     from supabase import create_client
     from supabase.lib.client_options import SyncClientOptions
 
+    # retries=2 en el transporte: probado con una prueba de carga real (20 personas
+    # marcando ingreso al mismo tiempo) -- bajo mucha concurrencia, alguna conexión a
+    # Supabase puede fallar de forma pasajera (nunca inventa datos, solo reintenta la
+    # misma consulta) en vez de reventarle la pantalla al empleado.
+    cliente_http = httpx.Client(transport=httpx.HTTPTransport(retries=2))
     return create_client(
-        config.SUPABASE_URL, config.SUPABASE_KEY, options=SyncClientOptions(schema=ESQUEMA)
+        config.SUPABASE_URL, config.SUPABASE_KEY,
+        options=SyncClientOptions(schema=ESQUEMA, httpx_client=cliente_http),
     )
 
 
