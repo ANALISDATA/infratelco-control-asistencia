@@ -5,6 +5,7 @@ import streamlit as st
 from backend.models import User
 from backend.services.employees import employee_service
 from backend.services.schedules import schedule_service
+from frontend.components import cache
 
 DIAS = [(1, "Lunes"), (2, "Martes"), (3, "Miércoles"), (4, "Jueves"), (5, "Viernes"), (6, "Sábado"), (7, "Domingo")]
 
@@ -57,11 +58,12 @@ def render(admin: User) -> None:
                 st.error("El nombre es obligatorio.")
             else:
                 schedule_service.crear_horario(admin, nombre.strip(), int(tolerancia), dias)
+                cache.limpiar_cache_horarios()
                 st.success(f"Horario «{nombre}» creado.")
                 st.rerun()
 
     st.divider()
-    horarios = schedule_service.listar_horarios()
+    horarios = cache.horarios()
     if not horarios:
         st.info("No hay horarios creados todavía. Mientras tanto, se usa el horario predeterminado de Configuración.")
         return
@@ -84,6 +86,7 @@ def render(admin: User) -> None:
 
     if guardar:
         schedule_service.actualizar_horario(admin, horario.id, nombre.strip(), int(tolerancia), dias)
+        cache.limpiar_cache_horarios()
         st.success("Horario actualizado.")
         st.rerun()
 
@@ -102,11 +105,12 @@ def render(admin: User) -> None:
     if modo == "A todos los empleados activos":
         if st.button("Aplicar a todos los empleados activos", key=f"aplicar_todos_{horario.id}"):
             total = employee_service.asignar_horario_a_todos(admin, horario.id)
+            cache.limpiar_cache_empleados()
             st.success(f"Horario «{horario.name}» asignado a {total} empleado(s) activo(s).")
     else:
         # operativos: quienes de verdad marcan asistencia -- un administrador con
         # ficha de empleado (ej. gerencia) no tiene horario que cumplir.
-        empleados_operativos = employee_service.listar_empleados_operativos(solo_activos=True, por_pagina=1000)
+        empleados_operativos = cache.empleados_operativos(solo_activos=True)
         if not empleados_operativos:
             st.info("No hay empleados activos para asignarles un horario individual.")
         else:
@@ -122,10 +126,12 @@ def render(admin: User) -> None:
                     employee_service.actualizar_empleado(
                         admin, opciones_empleado[empleado_elegido], {"schedule_id": horario.id}
                     )
+                    cache.limpiar_cache_empleados()
                     st.success(f"Horario «{horario.name}» asignado a {empleado_elegido}.")
 
     st.divider()
     if st.button("Desactivar este horario", key=f"desactivar_{horario.id}"):
         schedule_service.desactivar_horario(admin, horario.id)
+        cache.limpiar_cache_horarios()
         st.success("Horario desactivado.")
         st.rerun()

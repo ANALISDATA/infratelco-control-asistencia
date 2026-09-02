@@ -3,9 +3,9 @@ import streamlit as st
 
 from backend.models import User
 from backend.repositories import attendance_repository
-from backend.services.employees import employee_service
 from backend.services.reports import excel_service
 from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
+from frontend.components import cache
 
 
 def _fila(fecha_str: str, nombre: str, registro) -> dict:
@@ -38,11 +38,11 @@ def render(admin: User) -> None:
 
     # operativos = sin quienes tienen acceso de Administrador (ej. gerencia): a ellos
     # no se les espera que marquen, así que no deben salir como "No marcó".
-    empleados_activos = employee_service.listar_empleados_operativos(solo_activos=True, por_pagina=1000)
+    empleados_activos = cache.empleados_operativos(solo_activos=True)
     # Para resolver nombres se usan TODOS los empleados (no solo activos): un registro
     # real de alguien que se desactivó después (ej. renunció el mismo día que trabajó)
     # no debe desaparecer ni reventar la pantalla por no encontrar su nombre.
-    todos_los_empleados = employee_service.listar_empleados(solo_activos=False, por_pagina=2000)
+    todos_los_empleados = cache.empleados(solo_activos=False)
     nombre_por_id = {e.id: e.full_name for e in todos_los_empleados}
 
     fecha_str = fecha.strftime("%d/%m/%Y")

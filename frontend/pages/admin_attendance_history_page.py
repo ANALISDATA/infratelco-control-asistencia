@@ -6,9 +6,9 @@ import streamlit as st
 from backend.models import User
 from backend.repositories import attendance_repository
 from backend.services.attendance import attendance_service
-from backend.services.employees import employee_service
 from backend.services.reports import excel_service
 from backend.utils.timezone import ahora, formato_hora, formato_horas_minutos
+from frontend.components import cache
 
 _ANCHOS_COLUMNAS = {
     "Fecha": "small",
@@ -71,7 +71,7 @@ def render(admin: User) -> None:
     # solo_activos=False: un reporte de un rango pasado debe incluir a alguien que ya
     # se desactivó en el medio (ej. renunció a mitad de la quincena) -- sus registros
     # de esos días siguen siendo reales.
-    empleados = employee_service.listar_empleados(solo_activos=False, por_pagina=2000)
+    empleados = cache.empleados(solo_activos=False)
     nombre_por_id = {e.id: e.full_name for e in empleados}
 
     registros_ordenados = sorted(

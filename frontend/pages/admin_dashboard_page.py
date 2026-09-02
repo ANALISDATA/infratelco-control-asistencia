@@ -6,20 +6,19 @@ import streamlit.components.v1 as components
 
 from backend.models import User
 from backend.repositories import attendance_repository
-from backend.services.employees import employee_service
 from backend.utils.timezone import ahora
-from frontend.components import branding, charts
+from frontend.components import branding, cache, charts
 
 
 def render(admin: User) -> None:
     st.header("Dashboard")
 
-    activos = employee_service.listar_empleados(solo_activos=True, por_pagina=1000)
-    todos = employee_service.listar_empleados(solo_activos=False, por_pagina=1000)
+    activos = cache.empleados(solo_activos=True)
+    todos = cache.empleados(solo_activos=False)
     inactivos = len(todos) - len(activos)
     # Operativos = activos sin quienes tienen acceso de Administrador (ej. gerencia):
     # a ellos no se les espera que marquen, así que no cuentan como "No han marcado".
-    activos_operativos = employee_service.listar_empleados_operativos(solo_activos=True, por_pagina=1000)
+    activos_operativos = cache.empleados_operativos(solo_activos=True)
 
     hoy = ahora().date()
     registros_hoy = attendance_repository.listar_por_fecha(hoy)

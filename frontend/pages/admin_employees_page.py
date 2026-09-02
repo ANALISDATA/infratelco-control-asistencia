@@ -9,7 +9,7 @@ from backend.models import Employee, Role, User
 from backend.repositories import employee_repository, user_repository
 from backend.services.auth import auth_service
 from backend.services.employees import employee_service
-from backend.services.schedules import schedule_service
+from frontend.components import cache
 
 
 def _generar_password_temporal() -> str:
@@ -18,7 +18,7 @@ def _generar_password_temporal() -> str:
 
 
 def _opciones_horario() -> dict[str, str | None]:
-    horarios = schedule_service.listar_horarios()
+    horarios = cache.horarios()
     return {"Predeterminado de la empresa": None, **{h.name: h.id for h in horarios}}
 
 
@@ -76,6 +76,7 @@ def _formulario_crear(admin: User) -> None:
                 st.error(str(e))
                 return
 
+            cache.limpiar_cache_empleados()
             st.success(f"Empleado {empleado.full_name} creado correctamente.")
             st.warning(
                 f"Contraseña temporal para **{empleado.email}**: `{password_temporal}`\n\n"
@@ -87,7 +88,7 @@ def _formulario_crear(admin: User) -> None:
 
 def _tabla_empleados(admin: User) -> None:
     solo_activos = st.checkbox("Mostrar solo empleados activos", value=True)
-    empleados = employee_service.listar_empleados(solo_activos=solo_activos, por_pagina=500)
+    empleados = cache.empleados(solo_activos=solo_activos)
 
     if not empleados:
         st.info("No hay empleados registrados todavía.")
@@ -155,6 +156,7 @@ def _tabla_empleados(admin: User) -> None:
         except (employee_repository.DocumentoDuplicado, employee_repository.CorreoDuplicado) as e:
             st.error(str(e))
             return
+        cache.limpiar_cache_empleados()
         st.success("Cambios guardados.")
         st.rerun()
 
@@ -162,11 +164,13 @@ def _tabla_empleados(admin: User) -> None:
     with col_a:
         if empleado.is_active and st.button("Desactivar empleado", key=f"desactivar_{empleado.id}"):
             employee_service.desactivar_empleado(admin, empleado.id)
+            cache.limpiar_cache_empleados()
             st.success(f"{empleado.full_name} desactivado.")
             st.rerun()
     with col_b:
         if not empleado.is_active and st.button("Reactivar empleado", key=f"activar_{empleado.id}"):
             employee_service.activar_empleado(admin, empleado.id)
+            cache.limpiar_cache_empleados()
             st.success(f"{empleado.full_name} reactivado.")
             st.rerun()
     with col_c:
